@@ -1,0 +1,52 @@
+"use client";
+
+import Link from "next/link";
+import { Heart, Plus, Check, ArrowUpRight, Flashlight, Droplets } from "lucide-react";
+import { Film, Camera, Confidence } from "@/data/types";
+import { brandById } from "@/data/brands";
+import { countryFlag } from "@/data/countries";
+import { confidenceLabel, filmTypeShort, stockLabel, cameraTypeLabel, cameraExposures } from "@/lib/format";
+import { useStore } from "./store";
+
+export function ConfidenceBadge({confidence}:{confidence:Confidence}){return <span className={`confidence ${confidence}`}>{confidenceLabel[confidence]}</span>}
+
+export function FilmArt({film:item,large=false}:{film:Film;large?:boolean}){
+  const brand=brandById[item.brandId];
+  return <div className={`film-art ${large?"large":""}`} style={{"--art-color":brand.color} as React.CSSProperties} aria-hidden="true">
+    <div className="film-art-top"><span>{brand.name.toUpperCase()}</span><span>35MM / 135</span></div>
+    <div className="film-art-center"><span className="film-art-name">{item.name}</span><span className="film-art-iso">ISO<br/><b>{item.iso}</b></span></div>
+    <div className="film-art-bottom"><span>{filmTypeShort[item.filmType]}</span><span>● ● ● ● ●</span><span>{item.process}</span></div>
+  </div>;
+}
+
+export function CameraArt({camera:item,large=false}:{camera:Camera;large?:boolean}){
+  const brand=brandById[item.brandId];
+  return <div className={`camera-art ${large?"large":""}`} style={{"--art-color":brand.color} as React.CSSProperties} aria-hidden="true">
+    <div className="camera-art-head"><span>{brand.name.toUpperCase()}</span><span>35MM</span></div>
+    <div className="camera-illustration"><span className="camera-flash"/><span className="camera-lens"><i/></span><span className="camera-viewfinder"/></div>
+    <div className="camera-art-bottom"><span>{item.name}</span><b>{item.iso?`ISO ${item.iso}`:"ISO —"}</b></div>
+  </div>;
+}
+
+export function FilmCard({film:item}:{film:Film}){
+  const {favorites,compare,toggleFavorite,toggleCompare}=useStore();const brand=brandById[item.brandId];
+  const liked=favorites.films.includes(item.id),selected=compare.films.includes(item.id);
+  return <article className="catalog-card"><Link href={`/film/${item.id}`} className="card-art-link" aria-label={`${brand.name} ${item.name} 상세보기`}><FilmArt film={item}/></Link>
+    <div className="catalog-card-body"><div className="card-brand">{countryFlag(brand.country)} {brand.name.toUpperCase()} <span>ISO {item.iso}</span></div>
+      <Link href={`/film/${item.id}`} className="card-title">{item.name}</Link><p className="card-description">{item.description}</p>
+      <div className="tag-row"><span>{filmTypeShort[item.filmType]}</span><span>{item.process}</span>{item.balance&&<span>{item.balance.toUpperCase()}</span>}</div>
+      <div className="card-facts"><span>색감 <b>{item.colorProfile.slice(0,2).map((color)=><i key={color} style={{background:color}}/>)}</b></span><span>추천 <b>{item.recommendedFor.slice(0,2).join(" / ")}</b></span></div>
+      <div className="card-bottom"><Link href={`/film/${item.id}`} className="detail-link">상세보기 <ArrowUpRight size={15}/></Link><div><button disabled={!selected&&compare.films.length>=4} onClick={()=>toggleCompare("films",item.id)} className={`small-action ${selected?"selected":""}`} aria-label={`${item.name} 비교 ${selected?"해제":"추가"}`} title={selected?"비교 해제":compare.films.length>=4?"최대 4개까지 비교 가능":"비교 추가"}>{selected?<Check size={17}/>:<Plus size={17}/>}</button><button onClick={()=>toggleFavorite("films",item.id)} className={`small-action ${liked?"selected":""}`} aria-label={`${item.name} 즐겨찾기 ${liked?"해제":"추가"}`} title="즐겨찾기"><Heart size={17} fill={liked?"currentColor":"none"}/></button></div></div>
+    </div></article>;
+}
+
+export function CameraCard({camera:item}:{camera:Camera}){
+  const {favorites,compare,toggleFavorite,toggleCompare}=useStore(); const brand=brandById[item.brandId];
+  const liked=favorites.cameras.includes(item.id),selected=compare.cameras.includes(item.id);
+  return <article className="catalog-card"><Link href={`/camera/${item.id}`} className="card-art-link" aria-label={`${brand.name} ${item.name} 상세보기`}><CameraArt camera={item}/></Link>
+    <div className="catalog-card-body"><div className="card-brand">{countryFlag(brand.country)} {brand.name.toUpperCase()} <span>{item.iso?`ISO ${item.iso}`:"ISO —"}</span></div>
+      <Link href={`/camera/${item.id}`} className="card-title">{item.name}</Link><div className="camera-feature-line"><span>{cameraTypeLabel[item.cameraType]}</span><span>{cameraExposures(item.exposures)}</span>{item.flash&&<span><Flashlight size={13}/> 플래시</span>}{item.waterproof&&<span><Droplets size={13}/> 방수</span>}</div>
+      <p className="card-description">{item.embeddedFilmName || "필름 별도 장전"}</p><div className="tag-row"><span>{filmTypeShort[item.filmType]}</span><span>{item.process}</span><span className={item.stockStatus==="camera-exclusive"?"tag-accent":""}>{stockLabel[item.stockStatus]}</span></div>
+      <div className="card-bottom"><Link href={`/camera/${item.id}`} className="detail-link">상세보기 <ArrowUpRight size={15}/></Link><div><button disabled={!selected&&compare.cameras.length>=4} onClick={()=>toggleCompare("cameras",item.id)} className={`small-action ${selected?"selected":""}`} aria-label={`${item.name} 비교 ${selected?"해제":"추가"}`} title={!selected&&compare.cameras.length>=4?"최대 4개까지 비교 가능":undefined}>{selected?<Check size={17}/>:<Plus size={17}/>}</button><button onClick={()=>toggleFavorite("cameras",item.id)} className={`small-action ${liked?"selected":""}`} aria-label={`${item.name} 즐겨찾기 ${liked?"해제":"추가"}`}><Heart size={17} fill={liked?"currentColor":"none"}/></button></div></div>
+    </div></article>;
+}
