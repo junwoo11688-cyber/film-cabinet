@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Search, Shuffle, Sparkles } from "lucide-react";
 import { films } from "@/data/films";
 import { cameras } from "@/data/cameras";
@@ -19,15 +19,20 @@ const stats=[
 ];
 export default function Home(){
   const [query,setQuery]=useState("");const [randomFilm,setRandomFilm]=useState<string|undefined>();const [randomCamera,setRandomCamera]=useState<string|undefined>();
+  useEffect(()=>{if(window.location.hash==="#site-search")document.querySelector<HTMLInputElement>("#site-search input")?.focus()},[]);
   const results=useMemo(()=>{const q=query.trim().toLowerCase();if(!q)return null;const aliases=(s:string)=>s.toLowerCase().includes(q);
-    return {films:films.filter(x=>aliases(`${x.name} ${brandById[x.brandId].name} ISO ${x.iso} ${x.process} ${x.recommendedFor.join(" ")} ${x.filmType} ${x.filmType==="black-and-white"?"흑백":"컬러"}`)).slice(0,5),cameras:cameras.filter(x=>aliases(`${x.name} ${brandById[x.brandId].name} ISO ${x.iso} ${x.embeddedFilmName} ${x.filmType} ${x.filmType==="black-and-white"?"흑백":"컬러"}`)).slice(0,4),brands:brands.filter(x=>aliases(x.name)).slice(0,3)};
+    const matchingFilms=films.filter(x=>aliases(`${x.name} ${brandById[x.brandId].name} ISO ${x.iso} ${x.process} ${x.recommendedFor.join(" ")} ${x.filmType} ${x.filmType==="black-and-white"?"흑백":"컬러"}`));
+    const matchingCameras=cameras.filter(x=>aliases(`${x.name} ${brandById[x.brandId].name} ISO ${x.iso} ${x.embeddedFilmName} ${x.filmType} ${x.filmType==="black-and-white"?"흑백":"컬러"}`));
+    const matchingBrands=brands.filter(x=>aliases(x.name));
+    return {films:matchingFilms.slice(0,5),cameras:matchingCameras.slice(0,4),brands:matchingBrands.slice(0,3),total:matchingFilms.length+matchingCameras.length+matchingBrands.length};
   },[query]);
   const featured=films.find(x=>x.id==="kodak-gold-200")!;
   return <>
     <section className="home-hero"><div className="container hero-grid"><div className="hero-copy"><div className="eyebrow"><span className="eyebrow-line"/> THE ANALOG ENCYCLOPEDIA</div><h1>오늘은 어떤 필름을<br/><em>넣을까?</em></h1><p>브랜드, ISO, 색감, 현상 방식과 촬영 상황별로 35mm 필름과 일회용 카메라를 찾아보세요.</p>
-      <div className="hero-search-wrap"><Search size={21}/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="필름, 카메라 또는 브랜드 검색" aria-label="필름, 카메라 또는 브랜드 검색"/><kbd>SEARCH</kbd>
-      {results&&<div className="search-results" role="region" aria-label="검색 결과"><div className="search-results-heading">검색 결과 · {results.films.length+results.cameras.length+results.brands.length}</div>{results.films.map(x=><Link key={x.id} href={`/film/${x.id}`}><span className="result-type">FILM</span><strong>{brandById[x.brandId].name} {x.name}</strong><small>ISO {x.iso} · {x.process}</small></Link>)}{results.cameras.map(x=><Link key={x.id} href={`/camera/${x.id}`}><span className="result-type">CAMERA</span><strong>{brandById[x.brandId].name} {x.name}</strong><small>{x.exposures}컷</small></Link>)}{results.brands.map(x=><Link key={x.id} href={`/brand/${x.id}`}><span className="result-type">BRAND</span><strong>{x.name}</strong><small>{x.country}</small></Link>)}{!results.films.length&&!results.cameras.length&&!results.brands.length&&<p className="no-search">검색 결과가 없습니다. 다른 이름이나 ISO로 찾아보세요.</p>}</div>}</div>
-      <div className="quick-tags"><span>빠른 탐색</span>{["ISO 400","야경","흑백","Kodak"].map(x=><button key={x} onClick={()=>setQuery(x)}>{x}</button>)}</div>
+      <div className="hero-search-wrap" id="site-search"><Search size={21}/><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="필름, 카메라 또는 브랜드 검색" aria-label="필름, 카메라 또는 브랜드 검색"/><kbd>SEARCH</kbd>
+      {results&&<div className="search-results" role="region" aria-label="검색 결과"><div className="search-results-heading">검색 결과 · 전체 {results.total}개 (상위 항목 표시)</div>{results.films.map(x=><Link key={x.id} href={`/film/${x.id}`}><span className="result-type">FILM</span><strong>{brandById[x.brandId].name} {x.name}</strong><small>ISO {x.iso} · {x.process}</small></Link>)}{results.cameras.map(x=><Link key={x.id} href={`/camera/${x.id}`}><span className="result-type">CAMERA</span><strong>{brandById[x.brandId].name} {x.name}</strong><small>{x.exposures}컷</small></Link>)}{results.brands.map(x=><Link key={x.id} href={`/brand/${x.id}`}><span className="result-type">BRAND</span><strong>{x.name}</strong><small>{x.country}</small></Link>)}{!results.total&&<p className="no-search">검색 결과가 없습니다. 다른 이름이나 ISO로 찾아보세요.</p>}</div>}</div>
+      <div className="quick-tags"><span>빠른 검색</span>{["ISO 400","야경","흑백","Kodak"].map(x=><button key={x} onClick={()=>setQuery(x)}>{x}</button>)}</div>
+      <div className="hero-paths"><Link href="/films">필름 찾기 <ArrowRight size={17}/></Link><Link href="/cameras">카메라 찾기 <ArrowRight size={17}/></Link><Link href="/exclusive-films">카메라 전용 필름 <ArrowRight size={17}/></Link></div>
     </div><div className="hero-feature"><div className="hero-feature-header"><span>EDITOR&apos;S PICK / 001</span><span>35MM</span></div><div className="feature-art-wrap"><FilmArt film={featured} large/></div><div className="hero-feature-footer"><div><b>START HERE</b><strong>Kodak Gold 200</strong><span>가장 편안한 첫 롤의 색</span></div><Link href="/film/kodak-gold-200" aria-label="Kodak Gold 200 자세히 보기"><ArrowRight size={24}/></Link></div></div></div></section>
     <section className="stats-strip"><div className="container stats-grid">{stats.map(x=><div key={x.label}><strong>{String(x.value).padStart(2,"0")}</strong><span>{x.label}</span></div>)}</div></section>
     <section className="container section-block"><div className="section-heading"><div><span className="section-kicker">01 / FILM LIBRARY</span><h2>Popular Films</h2><p>색과 성격이 다른 필름을 한눈에 비교해보세요.</p></div><Link href="/films" className="text-link">전체 필름 보기 <ArrowRight size={17}/></Link></div><div className="card-grid">{popularFilmIds.map(id=><FilmCard key={id} film={films.find(x=>x.id===id)!}/>)}</div></section>
