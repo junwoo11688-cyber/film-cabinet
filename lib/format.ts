@@ -1,4 +1,4 @@
-import { Camera, Confidence, Film, FilmType, ManufacturingType } from "@/data/types";
+import { Camera, Confidence, Film, FilmType, ManufacturingType, CatalogStatus, FilmAvailability } from "@/data/types";
 
 export const filmTypeLabel: Record<FilmType, string> = {
   "color-negative":"컬러 네거티브", "black-and-white":"흑백 네거티브", slide:"슬라이드",
@@ -12,8 +12,31 @@ export const manufacturingLabel: Record<ManufacturingType, string> = {
   manufacturer:"직접 제조사", oem:"OEM", respooled:"리스풀", "cinema-conversion":"시네마 필름 가공", unknown:"원판 비공개",
 };
 export const confidenceLabel: Record<Confidence, string> = {
-  verified:"✓ 제조사 공개 정보", likely:"△ 일부 정보 제한", unknown:"? 원판·제조사 비공개",
+  verified:"✓ VERIFIED", likely:"△ LIKELY", unknown:"? UNKNOWN",
 };
+export const catalogStatusLabel: Record<CatalogStatus,string> = {
+  "official-current":"OFFICIAL CURRENT","official-legacy":"LEGACY","retail-current":"RETAIL CURRENT","regional-current":"REGIONAL CURRENT",unknown:"CATALOG UNKNOWN",
+};
+export const filmAvailabilityLabel: Record<FilmAvailability,string> = {
+  "in-stock":"IN STOCK","out-of-stock":"OUT OF STOCK",preorder:"PREORDER","retail-available":"RETAIL AVAILABLE",regional:"REGIONAL","availability-unknown":"AVAILABILITY UNKNOWN",discontinued:"DISCONTINUED",
+};
+export const buyableAvailability: FilmAvailability[] = ["in-stock","retail-available","regional","preorder"];
+export const filmAvailabilityFilters = ["전체","현재 구매 가능","공식 현행","소매 유통","예약 판매","지역 한정","품절","판매상태 확인 필요","레거시","단종"] as const;
+export function matchesFilmAvailability(film:Film,filter:string){
+  switch(filter){
+    case "전체":return true;
+    case "현재 구매 가능":return buyableAvailability.includes(film.availabilityStatus);
+    case "공식 현행":return film.catalogStatus==="official-current";
+    case "소매 유통":return film.catalogStatus==="retail-current"||film.availabilityStatus==="retail-available";
+    case "예약 판매":return film.availabilityStatus==="preorder";
+    case "지역 한정":return film.catalogStatus==="regional-current"||film.availabilityStatus==="regional";
+    case "품절":return film.availabilityStatus==="out-of-stock";
+    case "판매상태 확인 필요":return film.availabilityStatus==="availability-unknown";
+    case "레거시":return film.catalogStatus==="official-legacy";
+    case "단종":return film.status==="discontinued"||film.availabilityStatus==="discontinued";
+    default:return true;
+  }
+}
 export const cameraTypeLabel: Record<Camera["cameraType"], string> = {
   "single-use":"Single Use", "preloaded-reusable":"Preloaded Reusable", reusable:"Reusable",
 };

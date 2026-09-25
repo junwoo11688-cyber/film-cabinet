@@ -1,11 +1,66 @@
 import { brandById } from "./brands";
 import { Film } from "./types";
+import { catalogExpansions } from "./catalog-expansion";
 
-type FilmSeed = Omit<Film, "brandCountry" | "format" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence"> & Partial<Pick<Film, "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence">>;
+type FilmSeed = Omit<Film, "slug" | "brandCountry" | "format" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus"> & Partial<Pick<Film, "slug" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus">>;
+const officialSource = (brandId: string) => ({name:"브랜드 공식 카탈로그",url:({kodak:"https://www.kodak.com/en/still-film/home/",fujifilm:"https://www.fujifilm.com/jp/ja/consumer/films/negative-and-reversal/jan",ilford:"https://www.ilfordphoto.com/film/",harman:"https://www.harmanphoto.co.uk/harman-colour-film",cinestill:"https://cinestillfilm.com/collections/product-catalog/35mm",lomography:"https://shop.lomography.com/world/film/all",agfaphoto:"https://www.agfaphoto-gtc.com/en/95-photo-film",reto:"https://retoproject.com/collections/shop",filmneverdie:"https://filmneverdie.com/products/filmneverdie-bento-box",flicfilm:"https://flicfilm.ca/",lucky:"https://www.lucky.cn/index/home",manual:"https://shop.manualphoto.com/collections/film"} as Record<string,string>)[brandId],sourceTier:"manufacturer" as const});
+const kodakRetailSource = {name:"B&C Camera Kodak 35mm 판매 목록",url:"https://store.bandccamera.com/collections/kodak-35mm-film",sourceTier:"authorized-retailer" as const};
+const kodakRetailStatus: Partial<Film> = {catalogStatus:"retail-current",availabilityStatus:"retail-available",availabilityCheckedAt:"2026-09-25",marketRegions:["USA"],sources:[kodakRetailSource]};
+const catalogOverrides: Record<string, Partial<Film>> = {
+  "kodak-gold-200":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
+  "kodak-ultramax-400":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
+  "kodak-ektar-100":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
+  "kodak-trix-400":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
+  "kodak-portra-160":kodakRetailStatus,
+  "kodak-portra-400":kodakRetailStatus,
+  "kodak-portra-800":kodakRetailStatus,
+  "kodak-t-max-100":kodakRetailStatus,
+  "kodak-t-max-400":kodakRetailStatus,
+  "kodak-t-max-p3200":kodakRetailStatus,
+  "kodak-colorplus-200":kodakRetailStatus,
+  "kodak-proimage-100":kodakRetailStatus,
+  "fujifilm-400":{catalogStatus:"regional-current",marketRegions:["Japan"],sources:[officialSource("fujifilm")]},
+  "fujifilm-200":{catalogStatus:"unknown"},
+  "ilford-hp5-plus-400":{catalogStatus:"official-current",sources:[officialSource("ilford")]},
+  "ilford-xp2-super":{catalogStatus:"official-current",sources:[officialSource("ilford")]},
+  "ilford-delta-100":{catalogStatus:"official-current",sources:[officialSource("ilford")]},
+  "harman-phoenix-ii-200":{catalogStatus:"official-current",sources:[officialSource("harman")]},
+  "cinestill-800t":{catalogStatus:"official-current",sources:[officialSource("cinestill")]},
+  "cinestill-400d":{catalogStatus:"official-current",availabilityStatus:"out-of-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("cinestill")]},
+  "lomography-purple":{catalogStatus:"official-current",sources:[officialSource("lomography")]},
+  "lomography-color-400":{catalogStatus:"official-current",sources:[officialSource("lomography")]},
+  "lomography-turquoise":{catalogStatus:"official-current",sources:[officialSource("lomography")]},
+  "lomography-lomochrome-classicolor-200":{usedInCameras:["lomo-simple-classicolor"]},
+  "lomography-lomochrome-metropolis":{usedInCameras:["lomo-simple-metropolis"]},
+  "rollei-retro-80s":{catalogStatus:"retail-current",sources:[{name:"Rollei 공식 유통 자료",url:"https://www.macodirect.de/media/pdf/cc/65/94/Retro400_Datenblatt_e.pdf",sourceTier:"official-distributor"}]},
+  "agfaphoto-apx-400":{catalogStatus:"official-current",availabilityStatus:"in-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("agfaphoto")]},
+  "reto-prism-400":{catalogStatus:"official-current",availabilityStatus:"in-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("reto")]},
+  "filmneverdie-umi-800":{catalogStatus:"official-current",sources:[officialSource("filmneverdie")]},
+  "flicfilm-aurora-400":{catalogStatus:"official-current",sources:[officialSource("flicfilm")]},
+  "lucky-c200":{catalogStatus:"regional-current",availabilityStatus:"regional",marketRegions:["China"],availabilityCheckedAt:"2026-09-25",sources:[officialSource("lucky")]},
+  "manual-mc400":{catalogStatus:"official-current",availabilityStatus:"out-of-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("manual")]},
+};
+const discoveryCollections: Record<string,string[]> = {
+  "harman-phoenix-200":["새로운 자체 컬러 유제"],
+  "harman-phoenix-ii-200":["2025–2026 신제품","새로운 자체 컬러 유제"],
+  "harman-red-125":["2025–2026 신제품","새로운 자체 컬러 유제"],
+  "harman-switch-azure-125":["2025–2026 신제품","새로운 자체 컬러 유제"],
+  "lomography-lomochrome-classicolor-200":["2025–2026 신제품"],
+  "lucky-c400":["2025–2026 신제품"],
+  "flicfilm-street-savvy-400":["2025–2026 신제품"],
+};
+const expansionIds = new Set(catalogExpansions.map(item=>item.id));
+const typeDescription:Record<Film["filmType"],string>={"color-negative":"컬러 네거티브","black-and-white":"흑백 네거티브",slide:"슬라이드",redscale:"레드스케일","special-color":"특수 컬러",cinema:"영화용 원판 기반"};
+function factualDescription(item:FilmSeed){
+  const light=item.balance==="daylight"?" 일광용.":item.balance==="tungsten"?" 텅스텐 조명용.":"";
+  const region=item.marketRegions?.length&&item.catalogStatus==="regional-current"?` ${item.marketRegions.join(" · ")} 지역 공식 목록에서 확인됩니다.`:"";
+  const origin=!item.manufacturer?" 정확한 원판·제조사는 별도 확인이 필요합니다.":"";
+  return `ISO ${item.iso} ${typeDescription[item.filmType]} 필름으로 ${item.process} 현상을 사용합니다.${light}${region}${origin}`;
+}
 const film = (item: FilmSeed): Film => ({
-  format: "35mm", brandCountry: brandById[item.brandId].country,
+  slug: item.id, format: "35mm", brandCountry: brandById[item.brandId].country,
   grain: 3, contrast: 3, saturation: 3, latitude: 3, portrait: 3, landscape: 3, night: 2, beginner: 4, uniqueness: 2,
-  status: "current", dataConfidence: "likely", ...item,
+  status: "current", dataConfidence: "likely", catalogStatus:"unknown", availabilityStatus:"availability-unknown", marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide"]:undefined, ...item, ...catalogOverrides[item.id], description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription(item):item.description, collectionTags:discoveryCollections[item.id]||item.collectionTags, profileEstimated:expansionIds.has(item.id),
 });
 
 export const films: Film[] = [
@@ -37,6 +92,7 @@ export const films: Film[] = [
   film({ id:"vibe-400", brandId:"vibe", name:"400", iso:400, filmType:"color-negative", process:"C-41", manufacturingType:"unknown", stockOrigin:"공개되지 않음", colorProfile:["#d6aa72","#b57868","#6d8a9a"], description:"원판 정보가 공개되지 않은 독립 브랜드 컬러 필름.", recommendedFor:["일상","여행"], dataConfidence:"unknown" }),
   film({ id:"lucky-c200", brandId:"lucky", name:"C200", iso:200, filmType:"color-negative", process:"C-41", balance:"daylight", manufacturer:"Lucky Film", manufacturerCountry:"중국", manufacturingType:"manufacturer", contrast:3, saturation:3, colorProfile:["#d8ae74","#ba6d5c","#6992a5"], description:"중국 Lucky Film의 데이라이트 컬러 네거티브.", recommendedFor:["여행","일상","맑은 날"], dataConfidence:"likely" }),
   film({ id:"manual-mc400", brandId:"manual", name:"MC400", iso:400, filmType:"cinema", process:"C-41", balance:"daylight", manufacturingType:"cinema-conversion", stockOrigin:"영화용 컬러 네거티브 · 정확한 원판 미공개", contrast:4, saturation:3, night:3, uniqueness:4, colorProfile:["#d5a67b","#af7165","#688998"], description:"도시의 빛과 그림자를 담는 시네마 감성 컬러 필름. 정확한 원판은 공개 정보가 제한적입니다.", recommendedFor:["스트리트","영화 같은 느낌","일상"], dataConfidence:"unknown", sources:[{name:"Manual MC400 제품 정보",url:"https://shop.manualphoto.com/products/manual-mc400-35mm-film-single"}] }),
+  ...catalogExpansions.map(film),
 ];
 
 export const filmById = Object.fromEntries(films.map((item) => [item.id, item])) as Record<string, Film>;

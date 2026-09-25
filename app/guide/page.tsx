@@ -25,5 +25,11 @@ const terms=[
   ["Preloaded Reusable","일회용처럼 가볍지만 처음 필름이 들어 있고, 사용 후 새 필름을 다시 장전할 수 있는 카메라입니다."],
   ["Pre-exposed Film","제조 단계에서 무늬나 효과를 미리 노광한 필름입니다. 촬영한 장면 위에 패턴이 겹쳐집니다."],
   ["Camera Exclusive Film","일회용 카메라에 들어가지만 동일한 일반 35mm 롤로는 판매가 확인되지 않는 필름입니다. 판매 현황이 바뀔 수 있습니다."],
+  ["Official Current","브랜드의 현재 공식 35mm 제품 목록에서 확인된 필름입니다. 매장의 재고가 있다는 뜻은 아닙니다."],
+  ["Retail Current","공식 현행 목록에는 보이지 않지만 전문 판매점에서 신품 유통이 확인된 경우입니다. 현재 생산 중인지까지 단정하지 않습니다."],
+  ["Legacy","과거 공식 제품으로 확인되지만 현행 공식 목록에서는 확인되지 않는 필름입니다. 남은 재고가 판매될 수 있습니다."],
+  ["Out of Stock","확인한 판매처의 재고가 없는 상태입니다. 품절만으로 제품이 단종됐다고 판단하지 않습니다."],
+  ["Regional","특정 국가나 지역의 제품·판매 페이지에서만 확인된 상태입니다. 다른 나라의 판매 상황은 별도로 확인해야 합니다."],
+  ["Verified / Likely / Unknown","출처와 제조 관계의 신뢰도입니다. 공식 자료로 확인하면 Verified, 제한된 자료가 일치하면 Likely, 제조사·원판이 공개되지 않으면 Unknown으로 표시합니다."],
 ];
 export default function Page(){return <div className="container page-shell"><div className="page-heading"><span className="section-kicker">THE FIELD GUIDE</span><h1>Guide</h1><p>처음 필름을 고를 때 마주치는 말을 쉽게 풀었습니다. 용어를 알면 카드의 숫자와 배지가 더 잘 보입니다.</p></div><div className="guide-grid">{terms.map(([term,description])=><article className="guide-item" key={term}><h2>{term}</h2><p>{description}</p></article>)}</div><div className="guide-note"><b>일회용 카메라의 결과는 필름만으로 결정되지 않습니다.</b> 렌즈의 선명도, 고정된 셔터 속도와 조리개, 플래시의 도달 거리도 사진에 큰 영향을 줍니다. 같은 필름을 다른 카메라에 넣어도 결과가 다를 수 있습니다.</div></div>}

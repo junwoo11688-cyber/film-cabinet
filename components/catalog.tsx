@@ -8,7 +8,7 @@ import { films } from "@/data/films";
 import { cameras } from "@/data/cameras";
 import { brands, brandById } from "@/data/brands";
 import { countries } from "@/data/countries";
-import { filmTypeLabel, manufacturingLabel, isoBand, cameraTypeLabel, availabilityLabel } from "@/lib/format";
+import { filmTypeLabel, manufacturingLabel, isoBand, cameraTypeLabel, availabilityLabel, filmAvailabilityFilters, matchesFilmAvailability, catalogStatusLabel, filmAvailabilityLabel } from "@/lib/format";
 import { useStore } from "./store";
 
 type Group={key:string;label:string;options:string[]};
@@ -16,11 +16,16 @@ type Filters=Record<string,string[]>;
 const filmGroups:Group[]=[
   {key:"brand",label:"브랜드",options:brands.map(x=>x.name)},
   {key:"country",label:"브랜드 국가",options:countries.map(x=>x.name)},
+  {key:"manufacturerCountry",label:"제조 국가",options:[...new Set(films.map(x=>x.manufacturerCountry||"미확인"))]},
   {key:"type",label:"필름 종류",options:Object.values(filmTypeLabel)},
   {key:"iso",label:"ISO",options:["25 이하","50","80–100","125–200","250–400","500–800","1600 이상"]},
   {key:"process",label:"현상 방식",options:["C-41","B&W","E-6","ECN-2"]},
+  {key:"balance",label:"색온도",options:["Daylight","Tungsten","미확인"]},
   {key:"manufacturing",label:"브랜드 형태",options:Object.values(manufacturingLabel)},
+  {key:"sale",label:"판매 상태",options:[...filmAvailabilityFilters]},
+  {key:"market",label:"판매 지역",options:["Worldwide","USA","Japan","Korea","Europe","Hong Kong","Australia","Canada","China"]},
   {key:"for",label:"추천 촬영",options:["인물","일상","여행","풍경","스트리트","야경","실내","네온","공연","흑백","실험","빈티지","맑은 날","첫 필름","특수 색감","영화 같은 느낌"]},
+  {key:"collection",label:"특별 컬렉션",options:["2025–2026 신제품","새로운 자체 컬러 유제"]},
 ];
 const cameraGroups:Group[]=[
   {key:"brand",label:"브랜드",options:brands.filter(x=>cameras.some(y=>y.brandId===x.id)).map(x=>x.name)},
@@ -81,7 +86,8 @@ export function Catalog({kind}:{kind:"films"|"cameras"}){
   const toggle=(key:string,value:string)=>setFilters(prev=>{const current=prev[key]||[];return {...prev,[key]:current.includes(value)?current.filter(x=>x!==value):[...current,value]};});
   const list=useMemo(()=>kind==="films"?films.filter(item=>{
     const brand=brandById[item.brandId];const q=search.trim().toLowerCase();
-    return (!q||`${brand.name} ${item.name} ISO ${item.iso} ${item.process} ${item.recommendedFor.join(" ")}`.toLowerCase().includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",brand.country)&&match(filters,"type",filmTypeLabel[item.filmType])&&match(filters,"iso",isoBand(item.iso))&&match(filters,"process",item.process)&&match(filters,"manufacturing",manufacturingLabel[item.manufacturingType])&&includesAny(filters,"for",item.recommendedFor);
+    const searchable=`${brand.name} ${item.name} ISO ${item.iso} ${item.process} ${item.recommendedFor.join(" ")} ${item.filmType} ${filmTypeLabel[item.filmType]} ${item.manufacturer||""} ${item.stockOrigin||""} ${catalogStatusLabel[item.catalogStatus]} ${filmAvailabilityLabel[item.availabilityStatus]} ${item.marketRegions?.join(" ")||""} ${item.filmType==="black-and-white"?"black and white 흑백":""} ${item.night>=4?"night 야경":""}`.toLowerCase();
+    return (!q||searchable.includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",brand.country)&&match(filters,"manufacturerCountry",item.manufacturerCountry||"미확인")&&match(filters,"type",filmTypeLabel[item.filmType])&&match(filters,"iso",isoBand(item.iso))&&match(filters,"process",item.process)&&match(filters,"balance",item.balance==="daylight"?"Daylight":item.balance==="tungsten"?"Tungsten":"미확인")&&match(filters,"manufacturing",manufacturingLabel[item.manufacturingType])&&(!filters.sale?.length||filters.sale.some(value=>matchesFilmAvailability(item,value)))&&(!filters.market?.length||filters.market.some(value=>item.marketRegions?.includes(value as typeof item.marketRegions[number])))&&includesAny(filters,"for",item.recommendedFor)&&includesAny(filters,"collection",item.collectionTags||[]);
   }):cameras.filter(item=>{
     const brand=brandById[item.brandId];const q=search.trim().toLowerCase();
     return (!q||`${brand.name} ${item.name} ISO ${item.iso} ${item.embeddedFilmName}`.toLowerCase().includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",item.country)&&match(filters,"type",cameraTypeLabel[item.cameraType])&&match(filters,"iso",isoBand(item.iso))&&match(filters,"color",item.filmType==="black-and-white"?"흑백":"컬러")&&match(filters,"flash",item.flash?"있음":"없음")&&match(filters,"waterproof",item.waterproof?"있음":"없음")&&match(filters,"process",item.process)&&match(filters,"exposures",item.exposures===0?"필름에 따라 다름":item.exposures===27?"27컷":item.exposures===36?"36컷":"기타")&&match(filters,"reloadable",item.reloadable?"가능":"불가")&&match(filters,"availability",availabilityLabel[item.standaloneFilmAvailability]);

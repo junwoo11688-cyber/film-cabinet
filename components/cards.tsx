@@ -5,10 +5,11 @@ import { Heart, Check, ArrowUpRight, Flashlight, Droplets, GitCompareArrows } fr
 import { Film, Camera, Confidence } from "@/data/types";
 import { brandById } from "@/data/brands";
 import { countryFlag } from "@/data/countries";
-import { confidenceLabel, filmTypeShort, stockLabel, cameraTypeLabel, cameraExposures } from "@/lib/format";
+import { confidenceLabel, filmTypeShort, stockLabel, cameraTypeLabel, cameraExposures, catalogStatusLabel, filmAvailabilityLabel } from "@/lib/format";
 import { useStore } from "./store";
 
 export function ConfidenceBadge({confidence}:{confidence:Confidence}){return <span className={`confidence ${confidence}`}>{confidenceLabel[confidence]}</span>}
+export function FilmStatusBadges({film:item}:{film:Film}){return <div className="film-status-row"><span className={`film-status catalog-${item.catalogStatus}`}>{catalogStatusLabel[item.catalogStatus]}</span><span className={`film-status availability-${item.availabilityStatus}`}>{filmAvailabilityLabel[item.availabilityStatus]}{(item.availabilityStatus==="regional"||item.availabilityStatus==="preorder")&&item.marketRegions?.length?` · ${item.marketRegions.join(", ").toUpperCase()}`:""}</span></div>}
 
 export function FilmArt({film:item,large=false}:{film:Film;large?:boolean}){
   const brand=brandById[item.brandId];
@@ -36,8 +37,8 @@ export function FilmCard({film:item}:{film:Film}){
   return <article className="catalog-card"><Link href={`/film/${item.id}`} className="card-art-link" aria-label={`${brand.name} ${item.name} 상세보기`}><FilmArt film={item}/></Link>
     <div className="catalog-card-body"><div className="card-brand">{countryFlag(brand.country)} {brand.name.toUpperCase()} <span>ISO {item.iso}</span></div>
       <Link href={`/film/${item.id}`} className="card-title">{item.name}</Link><p className="card-description">{item.description}</p>
-      <div className="tag-row"><span>{filmTypeShort[item.filmType]}</span><span>{item.process}</span>{item.balance&&<span>{item.balance.toUpperCase()}</span>}</div>
-      <div className="card-facts"><span>색감 <b>{item.colorProfile.slice(0,2).map((color)=><i key={color} style={{background:color}}/>)}</b></span><span>추천 <b>{item.recommendedFor.slice(0,2).join(" / ")}</b></span></div>
+      <div className="tag-row"><span>{filmTypeShort[item.filmType]}</span><span>{item.process}</span>{item.balance&&<span>{item.balance.toUpperCase()}</span>}</div><FilmStatusBadges film={item}/>
+      <div className="card-facts"><span>색감 <b>{item.profileEstimated?"자료 확인 중":item.colorProfile.slice(0,2).map((color)=><i key={color} style={{background:color}}/>)}</b></span><span>추천 <b>{item.recommendedFor.slice(0,2).join(" / ")}</b></span></div>
       <div className="card-bottom"><Link href={`/film/${item.id}`} className="detail-link">상세보기 <ArrowUpRight size={15}/></Link><div><button disabled={!selected&&compare.films.length>=4} onClick={()=>toggleCompare("films",item.id)} className={`small-action ${selected?"selected":""}`} aria-label={`${item.name} 비교 ${selected?"해제":"추가"}`} title={selected?"비교 해제":compare.films.length>=4?"최대 4개까지 비교 가능":"비교 추가"}>{selected?<Check size={16}/>:<GitCompareArrows size={16}/>}<span>{selected?"비교됨":"비교"}</span></button><button onClick={()=>toggleFavorite("films",item.id)} className={`small-action ${liked?"selected":""}`} aria-label={`${item.name} 즐겨찾기 ${liked?"해제":"추가"}`} title="즐겨찾기"><Heart size={16} fill={liked?"currentColor":"none"}/><span>{liked?"저장됨":"저장"}</span></button></div></div>
     </div></article>;
 }

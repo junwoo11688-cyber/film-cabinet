@@ -2,7 +2,11 @@ export type Confidence = "verified" | "likely" | "unknown";
 export type Process = "C-41" | "B&W" | "E-6" | "ECN-2";
 export type FilmType = "color-negative" | "black-and-white" | "slide" | "redscale" | "special-color" | "cinema";
 export type ManufacturingType = "manufacturer" | "oem" | "respooled" | "cinema-conversion" | "unknown";
-export type Source = { name: string; url: string };
+export type FilmAvailability = "in-stock" | "out-of-stock" | "preorder" | "retail-available" | "regional" | "availability-unknown" | "discontinued";
+export type CatalogStatus = "official-current" | "official-legacy" | "retail-current" | "regional-current" | "unknown";
+export type MarketRegion = "Worldwide" | "USA" | "Japan" | "Korea" | "Europe" | "Hong Kong" | "Australia" | "Canada" | "China";
+export type SourceTier = "manufacturer" | "official-distributor" | "authorized-retailer" | "specialist-retailer" | "secondary";
+export type Source = { name: string; url: string; sourceTier?: SourceTier };
 
 export type Brand = {
   id: string;
@@ -13,10 +17,13 @@ export type Brand = {
   makesFilm: boolean;
   character: string;
   color: string;
+  manufacturer?: string;
+  parentCompany?: string;
 };
 
 export type Film = {
   id: string;
+  slug: string;
   brandId: string;
   name: string;
   brandCountry: string;
@@ -30,6 +37,8 @@ export type Film = {
   process: Process;
   balance?: "daylight" | "tungsten";
   dxCode?: boolean;
+  availableExposures?: number[];
+  packageVariants?: string[];
   grain: number;
   contrast: number;
   saturation: number;
@@ -42,7 +51,13 @@ export type Film = {
   colorProfile: string[];
   description: string;
   recommendedFor: string[];
+  collectionTags?: string[];
+  profileEstimated?: boolean;
   manufacturingType: ManufacturingType;
+  catalogStatus: CatalogStatus;
+  availabilityStatus: FilmAvailability;
+  marketRegions?: MarketRegion[];
+  availabilityCheckedAt?: string;
   status: "current" | "discontinued" | "limited";
   usedInCameras?: string[];
   dataConfidence: Confidence;

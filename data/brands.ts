@@ -4,6 +4,7 @@ export const brands: Brand[] = [
   { id:"kodak", name:"Kodak", country:"미국", group:"실제 필름 제조사", form:"직접 제조사", makesFilm:true, character:"따뜻한 데일리 컬러부터 전문용 네거티브까지", color:"#e7b423" },
   { id:"fujifilm", name:"Fujifilm", country:"일본", group:"실제 필름 제조사", form:"직접 제조사", makesFilm:true, character:"선명한 녹색과 균형 잡힌 일상 컬러", color:"#50a781" },
   { id:"ilford", name:"ILFORD PHOTO", country:"영국", group:"흑백 전문", form:"직접 제조사", makesFilm:true, character:"입문부터 암실 작업까지 이어지는 흑백의 표준", color:"#4b5969" },
+  { id:"kentmere", name:"Kentmere", country:"영국", group:"흑백 전문", form:"별도 흑백 브랜드", makesFilm:false, manufacturer:"HARMAN technology", parentCompany:"HARMAN technology", character:"HARMAN technology가 만드는 접근성 좋은 흑백 필름", color:"#59636c" },
   { id:"harman", name:"HARMAN Photo", country:"영국", group:"실제 필름 제조사", form:"직접 제조사", makesFilm:true, character:"영국에서 만드는 개성 강한 컬러 필름", color:"#e27356" },
   { id:"cinestill", name:"CineStill", country:"미국", group:"영화용 필름 기반", form:"시네마 필름 가공", makesFilm:false, character:"영화용 원판을 스틸 사진에 맞게 가공", color:"#dc505d" },
   { id:"lomography", name:"Lomography", country:"오스트리아", group:"특수 컬러 / 실험", form:"기획 브랜드", makesFilm:false, character:"예측할 수 없는 색과 실험적인 표현", color:"#875eb6" },
