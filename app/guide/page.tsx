@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 export const metadata:Metadata={title:"35mm 필름 입문 가이드",description:"ISO, C-41, 리스풀, OEM, 일회용 카메라 등 필름 사진 용어를 쉽게 설명합니다."};
-const terms=[
+const terms:[string,string][]=[
+  ["35mm","가장 널리 쓰이는 스틸 사진 필름 규격입니다. 135 카트리지에 들어 있으며 보통 한 롤을 카메라에 장전합니다."],
   ["ISO","필름이 빛에 얼마나 민감한지 나타내는 숫자입니다. 낮은 ISO는 밝은 낮에, 높은 ISO는 실내나 저녁에 유리합니다."],
   ["C-41","대부분의 컬러 네거티브 필름을 현상하는 표준 방식입니다. 일부 흑백 필름도 C-41로 현상합니다."],
   ["E-6","슬라이드(포지티브) 필름을 현상하는 방식입니다. 결과물이 투명 필름 위에 원래 색으로 보입니다."],
@@ -18,6 +19,7 @@ const terms=[
   ["Halation","강한 빛 주변에 붉거나 주황빛 테두리가 퍼져 보이는 현상입니다. 일부 시네마 필름 가공 제품에서 두드러집니다."],
   ["Grain","사진을 확대했을 때 보이는 입자 질감입니다. 고감도 필름에서 눈에 띄는 경우가 많습니다."],
   ["Latitude","노출이 조금 지나치거나 부족해도 디테일을 남기는 여유입니다. 네거티브 필름에서 중요한 선택 기준입니다."],
+  ["Contrast","밝은 부분과 어두운 부분이 얼마나 강하게 구분되는지 나타냅니다. 높을수록 이미지가 또렷하고 극적으로 보일 수 있습니다."],
   ["리스풀","이미 만들어진 원판을 다른 브랜드가 35mm 카트리지에 다시 감아 판매하는 방식입니다. 원판이 공개되지 않을 수도 있습니다."],
   ["OEM","다른 제조사가 브랜드를 위해 제품을 생산하는 방식입니다. 브랜드의 국가와 실제 제조국은 다를 수 있습니다."],
   ["시네마 필름","영화 촬영용으로 설계된 원판을 스틸 사진에 사용하는 필름입니다. 현상 방식과 렘젯 유무를 꼭 확인하세요."],
@@ -32,4 +34,11 @@ const terms=[
   ["Regional","특정 국가나 지역의 제품·판매 페이지에서만 확인된 상태입니다. 다른 나라의 판매 상황은 별도로 확인해야 합니다."],
   ["Verified / Likely / Unknown","출처와 제조 관계의 신뢰도입니다. 공식 자료로 확인하면 Verified, 제한된 자료가 일치하면 Likely, 제조사·원판이 공개되지 않으면 Unknown으로 표시합니다."],
 ];
-export default function Page(){return <div className="container page-shell"><div className="page-heading"><span className="section-kicker">THE FIELD GUIDE</span><h1>Guide</h1><p>처음 필름을 고를 때 마주치는 말을 쉽게 풀었습니다. 용어를 알면 카드의 숫자와 배지가 더 잘 보입니다.</p></div><div className="guide-grid">{terms.map(([term,description])=><article className="guide-item" key={term}><h2>{term}</h2><p>{description}</p></article>)}</div><div className="guide-note"><b>일회용 카메라의 결과는 필름만으로 결정되지 않습니다.</b> 렌즈의 선명도, 고정된 셔터 속도와 조리개, 플래시의 도달 거리도 사진에 큰 영향을 줍니다. 같은 필름을 다른 카메라에 넣어도 결과가 다를 수 있습니다.</div></div>}
+const groups=[
+  {title:"BASICS",description:"필름을 고르기 전에 알아둘 기본 용어",names:["35mm","ISO","DX 코드","Daylight","Push","Pull"]},
+  {title:"PROCESS",description:"현상소에 맡길 때 확인할 방식",names:["C-41","E-6","흑백","컬러 네거티브","슬라이드","ECN-2"]},
+  {title:"LOOK",description:"사진의 질감과 색을 읽는 말",names:["Grain","Latitude","Contrast","Halation","Redscale","Pre-exposed Film"]},
+  {title:"CINEMA",description:"영화용 필름에서 온 개념",names:["Rem-jet","시네마 필름","Tungsten"]},
+  {title:"DATABASE TERMS",description:"아카이브의 제조·판매 정보를 해석하는 법",names:["OEM","리스풀","Official Current","Retail Current","Legacy","Out of Stock","Regional","Verified / Likely / Unknown","Camera Exclusive Film","Single Use","Preloaded Reusable"]},
+];
+export default function Page(){const dictionary=new Map(terms);return <div className="container page-shell"><div className="page-heading"><span className="section-kicker">THE FIELD GUIDE</span><h1>Guide</h1><p>처음 필름을 고를 때 마주치는 말을 쉽게 풀었습니다. 궁금한 용어를 펼쳐보세요.</p></div><div className="guide-sections">{groups.map(group=><section className="guide-section" key={group.title}><div><span className="section-kicker">{group.title}</span><p>{group.description}</p></div><div className="guide-accordions">{group.names.map(name=><details key={name}><summary>{name}<span aria-hidden="true">＋</span></summary><p>{dictionary.get(name)}</p></details>)}</div></section>)}</div><div className="guide-note"><b>일회용 카메라의 결과는 필름만으로 결정되지 않습니다.</b> 렌즈의 선명도, 고정된 셔터 속도와 조리개, 플래시의 도달 거리도 사진에 영향을 줍니다. 같은 필름을 다른 카메라에 넣어도 결과가 다를 수 있습니다.</div></div>}

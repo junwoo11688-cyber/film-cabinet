@@ -1,0 +1,2 @@
+export function CatalogSkeleton(){return <div className="container page-shell" aria-label="목록 불러오는 중"><div className="skeleton-heading"/><div className="card-grid">{Array.from({length:8},(_,index)=><div className="skeleton-card" key={index}/>)}</div></div>}
+export function DetailSkeleton(){return <div className="container page-shell" aria-label="상세 정보 불러오는 중"><div className="skeleton-heading"/><div className="detail-overview-grid"><div className="skeleton-card"/><div className="skeleton-card"/></div></div>}

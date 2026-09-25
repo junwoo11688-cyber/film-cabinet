@@ -24,7 +24,7 @@ const {canonicalFilms} = load("data/master-catalog.ts");
 const {catalogExpansions} = load("data/catalog-expansion.ts");
 const {auditCatalog} = load("lib/catalog-audit.ts");
 const report = auditCatalog(films,brands,cameras,canonicalFilms);
-console.log("FILM INDEX DATA AUDIT");
+console.log("FILM CABINET DATA AUDIT");
 console.log(`Registered films: ${report.registeredFilms}`);
 console.log(`Canonical target films: ${report.canonicalFilms}`);
 console.log(`Missing films: ${report.missing.length}`);
