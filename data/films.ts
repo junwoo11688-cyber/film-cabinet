@@ -7,6 +7,10 @@ const officialSource = (brandId: string) => ({name:"브랜드 공식 카탈로�
 const kodakRetailSource = {name:"B&C Camera Kodak 35mm 판매 목록",url:"https://store.bandccamera.com/collections/kodak-35mm-film",sourceTier:"authorized-retailer" as const};
 const kodakRetailStatus: Partial<Film> = {catalogStatus:"retail-current",availabilityStatus:"retail-available",availabilityCheckedAt:"2026-09-25",marketRegions:["USA"],sources:[kodakRetailSource]};
 const catalogOverrides: Record<string, Partial<Film>> = {
+  "kodak-kodacolor-100":{balance:"daylight",availableExposures:[36],sources:[{name:"Kodak KODACOLOR 공식 제품",url:"https://www.kodak.com/en/still-film/product/consumer/kodacolor-film/",sourceTier:"manufacturer"}]},
+  "kodak-kodacolor-200":{balance:"daylight",availableExposures:[36],sources:[{name:"Kodak KODACOLOR 200 공식 제품",url:"https://www.kodak.com/en/still-film/product/consumer/kodacolor-200-film/",sourceTier:"manufacturer"}]},
+  "kodak-ektachrome-e100":{balance:"daylight",availableExposures:[36],sources:[{name:"Kodak EKTACHROME E100 공식 제품",url:"https://www.kodak.com/en/still-film/product/professional/ektachrome-e100-film/",sourceTier:"manufacturer"}]},
+  "kodak-ektapan-p3200":{exposureIndex:"멀티 스피드 · EI 3200 이상 증감 가능",availableExposures:[36],sources:[{name:"Kodak EKTAPAN P3200 공식 제품",url:"https://www.kodak.com/en/still-film/product/professional/ektapan/ektapan-p3200-film/",sourceTier:"manufacturer"}]},
   "kodak-gold-200":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
   "kodak-ultramax-400":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
   "kodak-ektar-100":{catalogStatus:"official-current",sources:[officialSource("kodak")]},
@@ -37,6 +41,8 @@ const catalogOverrides: Record<string, Partial<Film>> = {
   "reto-prism-400":{catalogStatus:"official-current",availabilityStatus:"in-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("reto")]},
   "filmneverdie-umi-800":{catalogStatus:"official-current",sources:[officialSource("filmneverdie")]},
   "flicfilm-aurora-400":{catalogStatus:"official-current",sources:[officialSource("flicfilm")]},
+  "flicfilm-cine-colour-200t":{balance:"tungsten"},
+  "flicfilm-cine-colour-500t":{balance:"tungsten"},
   "lucky-c200":{catalogStatus:"regional-current",availabilityStatus:"regional",marketRegions:["China"],availabilityCheckedAt:"2026-09-25",sources:[officialSource("lucky")]},
   "manual-mc400":{catalogStatus:"official-current",availabilityStatus:"out-of-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("manual")]},
 };
@@ -60,7 +66,7 @@ function factualDescription(item:FilmSeed){
 const film = (item: FilmSeed): Film => ({
   slug: item.id, format: "35mm", brandCountry: brandById[item.brandId].country,
   grain: 3, contrast: 3, saturation: 3, latitude: 3, portrait: 3, landscape: 3, night: 2, beginner: 4, uniqueness: 2,
-  status: "current", dataConfidence: "likely", catalogStatus:"unknown", availabilityStatus:"availability-unknown", marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide"]:undefined, ...item, ...catalogOverrides[item.id], description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription(item):item.description, collectionTags:discoveryCollections[item.id]||item.collectionTags, profileEstimated:expansionIds.has(item.id),
+  status: "current", dataConfidence: "likely", catalogStatus:"unknown", availabilityStatus:"availability-unknown", marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide"]:undefined, ...item, ...catalogOverrides[item.id], description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription({...item,...catalogOverrides[item.id]}):item.description, collectionTags:discoveryCollections[item.id]||item.collectionTags, profileEstimated:expansionIds.has(item.id),
 });
 
 export const films: Film[] = [
