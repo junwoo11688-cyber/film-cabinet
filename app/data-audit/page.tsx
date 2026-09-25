@@ -7,7 +7,7 @@ import { canonicalFilms } from "@/data/master-catalog";
 import { catalogExpansions } from "@/data/catalog-expansion";
 import { auditCatalog } from "@/lib/catalog-audit";
 
-export const metadata: Metadata = {title:"Data Audit | FILM INDEX",robots:{index:false,follow:false}};
+export const metadata: Metadata = {title:"Data Audit",robots:{index:false,follow:false}};
 const report = auditCatalog(films,brands,cameras,canonicalFilms);
 const metrics = [
   ["Registered Films",report.registeredFilms],["Canonical Films",report.canonicalFilms],["Missing",report.missing.length],
