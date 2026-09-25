@@ -45,8 +45,37 @@ function FilterGroup({group,selected,toggle}:{group:Group;selected:string[];togg
 
 export function Catalog({kind}:{kind:"films"|"cameras"}){
   const [filters,setFilters]=useState<Filters>({});const [search,setSearch]=useState("");const [drawer,setDrawer]=useState(false);
+  const [initializedKind,setInitializedKind]=useState<"films"|"cameras"|null>(null);
   const {compare}=useStore();const compareCount=compare[kind].length;
-  useEffect(()=>{const url=new URL(window.location.href);const next:Filters={};for(const [key,value] of url.searchParams){if((kind==="films"?filmGroups:cameraGroups).some(x=>x.key===key))next[key]=[...(next[key]||[]),value];}setFilters(next);},[kind]);
+  useEffect(()=>{
+    const restoreFromUrl=()=>{
+      const params=new URLSearchParams(window.location.search);
+      const next:Filters={};
+      const availableGroups=kind==="films"?filmGroups:cameraGroups;
+      for(const [key,value] of params){
+        if(availableGroups.some(group=>group.key===key&&group.options.includes(value)))next[key]=[...(next[key]||[]),value];
+      }
+      setFilters(next);
+      setSearch(params.get("q")||"");
+      setInitializedKind(kind);
+    };
+    restoreFromUrl();
+    window.addEventListener("popstate",restoreFromUrl);
+    return()=>window.removeEventListener("popstate",restoreFromUrl);
+  },[kind]);
+  useEffect(()=>{
+    if(initializedKind!==kind)return;
+    const url=new URL(window.location.href);
+    const availableGroups=kind==="films"?filmGroups:cameraGroups;
+    for(const group of availableGroups)url.searchParams.delete(group.key);
+    url.searchParams.delete("q");
+    for(const group of availableGroups)for(const value of filters[group.key]||[])url.searchParams.append(group.key,value);
+    if(search.trim())url.searchParams.set("q",search.trim());
+    const nextUrl=url.pathname+url.search+url.hash;
+    if(nextUrl!==window.location.pathname+window.location.search+window.location.hash){
+      window.history.replaceState(window.history.state,"",nextUrl);
+    }
+  },[kind,filters,search,initializedKind]);
   useEffect(()=>{if(!drawer)return;const onKey=(event:KeyboardEvent)=>{if(event.key==="Escape")setDrawer(false)};document.addEventListener("keydown",onKey);document.body.style.overflow="hidden";return()=>{document.removeEventListener("keydown",onKey);document.body.style.overflow=""}},[drawer]);
   const groups=kind==="films"?filmGroups:cameraGroups;
   const toggle=(key:string,value:string)=>setFilters(prev=>{const current=prev[key]||[];return {...prev,[key]:current.includes(value)?current.filter(x=>x!==value):[...current,value]};});
