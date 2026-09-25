@@ -9,8 +9,8 @@ import { brands, brandById } from "@/data/brands";
 import { exclusiveEntries } from "@/data/exclusive";
 import { FilmCard, CameraCard, FilmArt } from "@/components/cards";
 
-const popularFilmIds=["kodak-gold-200","kodak-portra-400","fujifilm-400","ilford-hp5-plus-400","cinestill-800t","harman-phoenix-ii-200","lomography-purple","lucky-c200"];
-const popularCameraIds=["kodak-funsaver","fujifilm-quicksnap-flash","fujifilm-quicksnap-bw","ilford-hp5-single-use"];
+const popularFilmIds=["kodak-gold-200","kodak-portra-400","fujifilm-400","ilford-hp5-plus-400","cinestill-800t","harman-phoenix-ii-200","lomography-purple","lucky-c200","manual-mc400","flicfilm-aurora-400"];
+const popularCameraIds=["kodak-funsaver","fujifilm-quicksnap-flash","fujifilm-quicksnap-bw","ilford-hp5-single-use","agfa-lebox-bw","manual-disposable"];
 const stats=[
   {label:"등록 브랜드",value:brands.length},{label:"등록 필름",value:films.length},{label:"카메라",value:cameras.length},
   {label:"전용·희귀 내장필름",value:exclusiveEntries.filter(x=>x.kind!=="available").length},
