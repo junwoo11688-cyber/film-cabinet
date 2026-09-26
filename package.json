@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "audit:films": "node scripts/audit-films.mjs"
+    "audit:films": "node scripts/audit-films.mjs",
+    "test:recommendations": "node scripts/test-recommendations.mjs",
+    "test:search": "node scripts/test-search.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

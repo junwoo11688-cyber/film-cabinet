@@ -2,6 +2,7 @@ import { brandById } from "./brands";
 import { Film } from "./types";
 import { catalogExpansions } from "./catalog-expansion";
 import { archiveExpansions } from "./archive-expansion";
+import { practicalFilmOverrides } from "./practical-data";
 
 type FilmSeed = Omit<Film, "slug" | "brandCountry" | "format" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus"> & Partial<Pick<Film, "slug" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus">>;
 const officialSource = (brandId: string) => ({name:"브랜드 공식 카탈로그",url:({kodak:"https://www.kodak.com/en/still-film/home/",fujifilm:"https://www.fujifilm.com/jp/ja/consumer/films/negative-and-reversal/jan",ilford:"https://www.ilfordphoto.com/film/",harman:"https://www.harmanphoto.co.uk/harman-colour-film",cinestill:"https://cinestillfilm.com/collections/product-catalog/35mm",lomography:"https://shop.lomography.com/world/film/all",agfaphoto:"https://www.agfaphoto-gtc.com/en/95-photo-film",reto:"https://retoproject.com/collections/shop",filmneverdie:"https://filmneverdie.com/products/filmneverdie-bento-box",flicfilm:"https://flicfilm.ca/",lucky:"https://www.lucky.cn/index/home",manual:"https://shop.manualphoto.com/collections/film"} as Record<string,string>)[brandId],sourceTier:"manufacturer" as const});
@@ -76,14 +77,26 @@ function factualDescription(item:FilmSeed){
   const origin=!item.manufacturer?" 정확한 원판·제조사는 별도 확인이 필요합니다.":"";
   return `ISO ${item.iso} ${typeDescription[item.filmType]} 필름으로 ${item.process} 현상을 사용합니다.${light}${region}${origin}`;
 }
-const film = (item: FilmSeed): Film => ({
-  slug: item.id, format: "35mm", brandCountry: brandById[item.brandId].country,
-  photographyUse:"still", packagingType:"135-cartridge",
-  filmCategory:item.filmType==="cinema"?"cinema":item.filmType==="redscale"?"redscale":item.filmType==="special-color"?"effect":"standard",
-  primaryProcess:item.process, treatment:"none",
-  grain: 3, contrast: 3, saturation: 3, latitude: 3, portrait: 3, landscape: 3, night: 2, beginner: 4, uniqueness: 2,
-  status: "current", dataConfidence: "likely", catalogStatus:"unknown", availabilityStatus:"availability-unknown", marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide"]:undefined, ...item, ...catalogOverrides[item.id], description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription({...item,...catalogOverrides[item.id]}):item.description, collectionTags:discoveryCollections[item.id]||item.collectionTags, profileEstimated:expansionIds.has(item.id),
-});
+const film = (item: FilmSeed): Film => {
+  const merged = {
+    slug:item.id,format:"35mm" as const,brandCountry:brandById[item.brandId].country,
+    photographyUse:"still" as const,packagingType:"135-cartridge" as const,
+    filmCategory:item.filmType==="cinema"?"cinema" as const:item.filmType==="redscale"?"redscale" as const:item.filmType==="special-color"?"effect" as const:"standard" as const,
+    primaryProcess:item.process,treatment:"none" as const,
+    grain:3,contrast:3,saturation:3,latitude:3,portrait:3,landscape:3,night:2,beginner:4,uniqueness:2,
+    status:"current" as const,dataConfidence:"likely" as const,catalogStatus:"unknown" as const,availabilityStatus:"availability-unknown" as const,
+    marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide" as const]:undefined,
+    ...item,...catalogOverrides[item.id],...practicalFilmOverrides[item.id],
+  };
+  return {
+    ...merged,
+    dxCoding:merged.dxCoding??(merged.dxCode===undefined?undefined:merged.dxCode?"yes":"no"),
+    colorBalance:merged.colorBalance??(merged.filmType==="black-and-white"?"not-applicable":merged.balance),
+    description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription({...item,...catalogOverrides[item.id]}):item.description,
+    collectionTags:discoveryCollections[item.id]||item.collectionTags,
+    profileEstimated:expansionIds.has(item.id),
+  };
+};
 
 export const films: Film[] = [
   film({ id:"kodak-gold-200", brandId:"kodak", name:"Gold 200", iso:200, filmType:"color-negative", process:"C-41", balance:"daylight", dxCode:true, manufacturer:"Eastman Kodak", manufacturerCountry:"미국", stockOrigin:"Kodak Gold", manufacturingType:"manufacturer", grain:4, saturation:4, latitude:4, portrait:4, landscape:5, beginner:5, colorProfile:["#e8b24e","#d97b4b","#b95143","#7594ab"], description:"따뜻한 노랑과 오렌지 톤이 돋보이는 대표적인 데일리 컬러 필름.", recommendedFor:["여행","일상","맑은 날","빈티지"], dataConfidence:"verified" }),

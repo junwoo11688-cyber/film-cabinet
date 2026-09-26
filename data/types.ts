@@ -11,6 +11,23 @@ export type PhotographyUse = "still" | "motion-picture" | "industrial" | "multi-
 export type PackagingType = "135-cartridge" | "35mm-motion-bulk" | "35mm-bulk" | "other";
 export type FilmCategory = "standard" | "cinema" | "effect" | "pre-exposed" | "redscale" | "infrared" | "ortho" | "industrial" | "special-purpose";
 export type Treatment = "none" | "remjet-removed" | "ahu" | "pre-exposed" | "color-tinted" | "redscale" | "special-effect";
+export type PracticalGrain = "fine" | "medium" | "pronounced" | "unknown";
+export type PracticalContrast = "low" | "medium" | "high" | "unknown";
+export type PracticalSaturation = "muted" | "natural" | "vivid" | "experimental" | "not-applicable" | "unknown";
+export type PracticalLatitude = "narrow" | "normal" | "wide" | "unknown";
+export type RecommendedUse = "portrait" | "street" | "landscape" | "travel" | "everyday" | "indoor" | "night" | "architecture" | "experimental" | "cinema-look";
+export type RecommendedLight = "bright-daylight" | "daylight" | "overcast" | "indoor" | "tungsten" | "mixed-light" | "night" | "flash";
+export type PracticalProfile = {
+  grain?: PracticalGrain;
+  contrast?: PracticalContrast;
+  saturation?: PracticalSaturation;
+  latitude?: PracticalLatitude;
+  recommendedUses?: RecommendedUse[];
+  recommendedLight?: RecommendedLight[];
+  profileConfidence?: "verified" | "consensus" | "unknown";
+  profileNotes?: string;
+  profileSources?: string[];
+};
 
 export type Brand = {
   id: string;
@@ -67,7 +84,19 @@ export type Film = {
   industrialStock?: boolean;
   balance?: "daylight" | "tungsten";
   dxCode?: boolean;
+  dxCoding?: "yes" | "no" | "varies" | "unknown";
   availableExposures?: number[];
+  colorBalance?: "daylight" | "tungsten" | "neutral" | "not-applicable" | "unknown";
+  remjet?: "present" | "removed" | "none" | "unknown";
+  pushPull?: {
+    officialSupport: "yes" | "no" | "not-stated";
+    minEI?: number;
+    maxEI?: number;
+    notes?: string;
+  };
+  irSensitivity?: "yes" | "extended-red" | "no" | "unknown";
+  orthochromatic?: "yes" | "no" | "unknown";
+  practicalProfile?: PracticalProfile;
   packageVariants?: string[];
   grain: number;
   contrast: number;

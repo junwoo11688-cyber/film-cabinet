@@ -51,6 +51,23 @@ export function auditCatalog(films: Film[], brands: Brand[], cameras: Camera[], 
   }
   const missing = canonical.filter(item => !filmById.has(item.id));
   for (const item of missing) issues.push({code:"canonical-missing",filmId:item.id,detail:`마스터 누락: ${item.brandId} ${item.name}`});
+  const known=<T,>(value:T|"unknown"|undefined)=>value!==undefined&&value!=="unknown";
+  const practicalCoverage={
+    profile:films.filter(item=>!!item.practicalProfile),
+    grain:films.filter(item=>known(item.practicalProfile?.grain)),
+    contrast:films.filter(item=>known(item.practicalProfile?.contrast)),
+    saturation:films.filter(item=>known(item.practicalProfile?.saturation)),
+    latitude:films.filter(item=>known(item.practicalProfile?.latitude)),
+    recommendedUses:films.filter(item=>!!item.practicalProfile?.recommendedUses?.length),
+  };
+  const technicalCoverage={
+    dx:films.filter(item=>known(item.dxCoding)),
+    exposures:films.filter(item=>!!item.availableExposures?.length),
+    colorBalance:films.filter(item=>known(item.colorBalance)),
+    remjet:films.filter(item=>known(item.remjet)),
+    pushPull:films.filter(item=>item.pushPull?.officialSupport==="yes"||item.pushPull?.officialSupport==="no"),
+    irOrtho:films.filter(item=>known(item.irSensitivity)||known(item.orthochromatic)),
+  };
   return {
     registeredFilms: films.length, canonicalFilms: canonical.length, registeredBrands: brands.length, registeredCameras: cameras.length,
     missing, issues,
@@ -68,5 +85,7 @@ export function auditCatalog(films: Film[], brands: Brand[], cameras: Camera[], 
     limited: films.filter(item => item.limitedEdition || item.catalogStatus==="limited"),
     comingSoon: films.filter(item => item.comingSoon || item.catalogStatus==="in-development"),
     missingSources,
+    practicalCoverage,
+    technicalCoverage,
   };
 }

@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useStore } from "./store";
 import { SearchPalette } from "./search-palette";
 
-const links = [["FILMS", "/films"], ["CAMERAS", "/cameras"], ["DISCOVER", "/discover"], ["COMPARE", "/compare"], ["GUIDE", "/guide"]] as const;
+const links = [["FILMS", "/films"], ["CAMERAS", "/cameras"], ["DISCOVER", "/discover"], ["TODAY'S FILM", "/recommend"], ["COMPARE", "/compare"], ["GUIDE", "/guide"]] as const;
 
 export function Navigation() {
   const path = usePathname();

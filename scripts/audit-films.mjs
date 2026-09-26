@@ -44,6 +44,11 @@ console.log(`Industrial / special: ${report.industrial.length}`);
 console.log(`Limited: ${report.limited.length}`);
 console.log(`Coming soon: ${report.comingSoon.length}`);
 console.log(`Missing sources: ${report.missingSources.length}`);
+console.log(`Practical profiles: ${report.practicalCoverage.profile.length}`);
+console.log(`Grain / Contrast / Saturation / Latitude known: ${report.practicalCoverage.grain.length} / ${report.practicalCoverage.contrast.length} / ${report.practicalCoverage.saturation.length} / ${report.practicalCoverage.latitude.length}`);
+console.log(`Recommended uses known: ${report.practicalCoverage.recommendedUses.length}`);
+console.log(`DX / Exposures / Color balance known: ${report.technicalCoverage.dx.length} / ${report.technicalCoverage.exposures.length} / ${report.technicalCoverage.colorBalance.length}`);
+console.log(`Rem-jet / Push-Pull / IR-Ortho known: ${report.technicalCoverage.remjet.length} / ${report.technicalCoverage.pushPull.length} / ${report.technicalCoverage.irOrtho.length}`);
 for (const [label,items] of [["MISSING",report.missing.map(item=>`${item.brandId} ${item.name}`)],["MISSING SOURCES",report.missingSources.map(item=>`${item.brandId} ${item.name}`)],["ISSUES",report.issues.map(item=>item.detail)],["ARCHIVE EXPANSION",archiveExpansions.map(item=>`${item.brandId} ${item.name}`)],["NEWLY DISCOVERED",catalogExpansions.filter(item=>item.newlyDiscovered).map(item=>`${item.brandId} ${item.name}`)]]) {
   console.log(`\n${label}`);
   console.log(items.length ? items.map(item=>`- ${item}`).join("\n") : "- 없음");

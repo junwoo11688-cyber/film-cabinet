@@ -5,17 +5,24 @@ import { useState } from "react";
 import { films, filmById } from "@/data/films";
 import { cameras, cameraById } from "@/data/cameras";
 import { brandById } from "@/data/brands";
-import { filmTypeLabel, manufacturingLabel, stockLabel, availabilityLabel, cameraExposures, catalogStatusLabel, filmAvailabilityLabel, photographyUseLabel, packagingTypeLabel, filmCategoryLabel, treatmentLabel } from "@/lib/format";
+import { filmTypeLabel, manufacturingLabel, stockLabel, availabilityLabel, cameraExposures, catalogStatusLabel, filmAvailabilityLabel, photographyUseLabel, packagingTypeLabel, filmCategoryLabel, treatmentLabel, practicalGrainLabel, practicalContrastLabel, practicalSaturationLabel, practicalLatitudeLabel, colorBalanceLabel, dxCodingLabel, remjetLabel } from "@/lib/format";
 import { useStore } from "./store";
 
 type Kind="films"|"cameras";
 type Row=[string,(id:string)=>React.ReactNode];
 type Section={title:string;rows:Row[]};
-const score=(id:string,key:"grain"|"contrast"|"saturation"|"latitude"|"portrait"|"landscape"|"night"|"beginner"|"uniqueness")=>filmById[id].profileEstimated?"미평가":`${filmById[id][key]}/5`;
+const profileValue=(id:string,key:"grain"|"contrast"|"saturation"|"latitude")=>{
+  const value=filmById[id].practicalProfile?.[key];
+  if(!value||value==="unknown")return "미확인";
+  if(key==="grain")return practicalGrainLabel[value as keyof typeof practicalGrainLabel];
+  if(key==="contrast")return practicalContrastLabel[value as keyof typeof practicalContrastLabel];
+  if(key==="saturation")return practicalSaturationLabel[value as keyof typeof practicalSaturationLabel];
+  return practicalLatitudeLabel[value as keyof typeof practicalLatitudeLabel];
+};
 const filmSections:Section[]=[
-  {title:"BASIC",rows:[["ISO",id=>filmById[id].iso],["Film Type",id=>filmTypeLabel[filmById[id].filmType]],["Use",id=>photographyUseLabel[filmById[id].photographyUse||"still"]],["Packaging",id=>packagingTypeLabel[filmById[id].packagingType||"135-cartridge"]],["Category",id=>filmCategoryLabel[filmById[id].filmCategory||"standard"]],["Process",id=>filmById[id].process],["Balance",id=>filmById[id].balance||"미확인"]]},
-  {title:"LOOK",rows:[["Grain",id=>score(id,"grain")],["Contrast",id=>score(id,"contrast")],["Saturation",id=>score(id,"saturation")],["Latitude",id=>score(id,"latitude")],["Uniqueness",id=>score(id,"uniqueness")]]},
-  {title:"USE",rows:[["Portrait",id=>score(id,"portrait")],["Landscape",id=>score(id,"landscape")],["Night",id=>score(id,"night")],["Beginner",id=>score(id,"beginner")]]},
+  {title:"BASIC",rows:[["ISO",id=>filmById[id].iso],["Film Type",id=>filmTypeLabel[filmById[id].filmType]],["Use",id=>photographyUseLabel[filmById[id].photographyUse||"still"]],["Packaging",id=>packagingTypeLabel[filmById[id].packagingType||"135-cartridge"]],["Category",id=>filmCategoryLabel[filmById[id].filmCategory||"standard"]],["Process",id=>filmById[id].process],["Balance",id=>filmById[id].colorBalance?colorBalanceLabel[filmById[id].colorBalance!]:"미확인"]]},
+  {title:"LOOK",rows:[["Grain",id=>profileValue(id,"grain")],["Contrast",id=>profileValue(id,"contrast")],["Saturation",id=>profileValue(id,"saturation")],["Latitude",id=>profileValue(id,"latitude")]]},
+  {title:"PRACTICAL",rows:[["Best For",id=>filmById[id].practicalProfile?.recommendedUses?.join(" · ")||"미확인"],["Light",id=>filmById[id].practicalProfile?.recommendedLight?.join(" · ")||"미확인"],["DX",id=>filmById[id].dxCoding?dxCodingLabel[filmById[id].dxCoding!]:"미확인"],["Exposures",id=>filmById[id].availableExposures?.join(" / ")||"미확인"],["Rem-jet",id=>filmById[id].remjet?remjetLabel[filmById[id].remjet!]:"미확인"]]},
   {title:"ORIGIN",rows:[["Brand",id=>brandById[filmById[id].brandId].name],["Brand Country",id=>filmById[id].brandCountry],["Manufacturer",id=>filmById[id].manufacturer||"공개되지 않음"],["Manufacturer Country",id=>filmById[id].manufacturerCountry||"미확인"],["Original Stock",id=>filmById[id].stockOrigin||"공개되지 않음"],["Stock Code",id=>filmById[id].sourceStockCode||"미확인"],["Treatment",id=>treatmentLabel[filmById[id].treatment||"none"]],["Derived From",id=>filmById[id].derivedFromFilmId?filmById[filmById[id].derivedFromFilmId!]?.name||"연결 오류":"해당 없음"],["Manufacturing",id=>manufacturingLabel[filmById[id].manufacturingType]],["Confidence",id=>filmById[id].dataConfidence.toUpperCase()]]},
   {title:"STATUS",rows:[["Catalog",id=>catalogStatusLabel[filmById[id].catalogStatus]],["Availability",id=>filmAvailabilityLabel[filmById[id].availabilityStatus]],["Region",id=>filmById[id].marketRegions?.join(" · ")||"미확인"],["Last Verified",id=>filmById[id].availabilityCheckedAt||"미확인"]]},
 ];

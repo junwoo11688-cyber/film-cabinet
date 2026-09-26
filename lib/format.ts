@@ -1,4 +1,4 @@
-import { Camera, Confidence, Film, FilmType, ManufacturingType, CatalogStatus, FilmAvailability, PhotographyUse, PackagingType, FilmCategory, Treatment } from "@/data/types";
+import { Camera, Confidence, Film, FilmType, ManufacturingType, CatalogStatus, FilmAvailability, PhotographyUse, PackagingType, FilmCategory, Treatment, PracticalGrain, PracticalContrast, PracticalSaturation, PracticalLatitude, RecommendedUse, RecommendedLight } from "@/data/types";
 
 export const filmTypeLabel: Record<FilmType, string> = {
   "color-negative":"컬러 네거티브", "black-and-white":"흑백 네거티브", slide:"슬라이드",
@@ -21,6 +21,15 @@ export const photographyUseLabel:Record<PhotographyUse,string>={still:"Still Pho
 export const packagingTypeLabel:Record<PackagingType,string>={"135-cartridge":"135 Cartridge","35mm-motion-bulk":"35mm Motion Bulk","35mm-bulk":"35mm Bulk",other:"Other"};
 export const filmCategoryLabel:Record<FilmCategory,string>={standard:"Standard",cinema:"Cinema",effect:"Effect","pre-exposed":"Pre-exposed",redscale:"Red Scale",infrared:"Infrared",ortho:"Ortho",industrial:"Industrial","special-purpose":"Special Purpose"};
 export const treatmentLabel:Record<Treatment,string>={none:"None","remjet-removed":"Rem-jet removed",ahu:"AHU","pre-exposed":"Pre-exposed","color-tinted":"Color-tinted",redscale:"Redscale","special-effect":"Special effect"};
+export const practicalGrainLabel:Record<PracticalGrain,string>={fine:"Fine",medium:"Medium",pronounced:"Pronounced",unknown:"Not documented"};
+export const practicalContrastLabel:Record<PracticalContrast,string>={low:"Low",medium:"Medium",high:"High",unknown:"Not documented"};
+export const practicalSaturationLabel:Record<PracticalSaturation,string>={muted:"Muted",natural:"Natural",vivid:"Vivid",experimental:"Experimental","not-applicable":"Not applicable",unknown:"Not documented"};
+export const practicalLatitudeLabel:Record<PracticalLatitude,string>={narrow:"Narrow",normal:"Normal",wide:"Wide",unknown:"Not documented"};
+export const recommendedUseLabel:Record<RecommendedUse,string>={portrait:"Portrait",street:"Street",landscape:"Landscape",travel:"Travel",everyday:"Everyday",indoor:"Indoor",night:"Night",architecture:"Architecture",experimental:"Experimental","cinema-look":"Cinema Look"};
+export const recommendedLightLabel:Record<RecommendedLight,string>={"bright-daylight":"Bright Daylight",daylight:"Daylight",overcast:"Overcast",indoor:"Indoor",tungsten:"Tungsten","mixed-light":"Mixed Light",night:"Night",flash:"Flash"};
+export const dxCodingLabel:Record<NonNullable<Film["dxCoding"]>,string>={yes:"YES",no:"NO",varies:"VARIES",unknown:"UNKNOWN"};
+export const colorBalanceLabel:Record<NonNullable<Film["colorBalance"]>,string>={daylight:"DAYLIGHT",tungsten:"TUNGSTEN",neutral:"NEUTRAL / GENERAL","not-applicable":"NOT APPLICABLE",unknown:"UNKNOWN"};
+export const remjetLabel:Record<NonNullable<Film["remjet"]>,string>={present:"PRESENT",removed:"REMOVED",none:"NONE",unknown:"UNKNOWN"};
 export const filmAvailabilityLabel: Record<FilmAvailability,string> = {
   "in-stock":"IN STOCK","out-of-stock":"OUT OF STOCK",preorder:"PREORDER","retail-available":"RETAIL AVAILABLE",regional:"REGIONAL","availability-unknown":"AVAILABILITY UNKNOWN",discontinued:"DISCONTINUED",
 };
