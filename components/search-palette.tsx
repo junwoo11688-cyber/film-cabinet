@@ -26,7 +26,7 @@ export function SearchPalette({open,onClose}:{open:boolean;onClose:()=>void}) {
     const q = raw === "night" ? "야경" : raw === "black and white" || raw === "b&w" ? "흑백" : raw;
     const match = (value:string) => value.toLowerCase().includes(raw) || value.toLowerCase().includes(q);
     return {
-      films: films.filter(x => match(`${brandById[x.brandId].name} ${x.name} ISO ${x.iso} ${x.process} ${x.recommendedFor.join(" ")} ${x.filmType} ${x.filmType === "black-and-white" ? "흑백" : ""}`)).slice(0,6),
+      films: films.filter(x => match(`${brandById[x.brandId].name} ${x.name} ISO ${x.iso} ${x.process} ${x.recommendedFor.join(" ")} ${x.filmType} ${x.sourceStockCode||""} ${x.searchAliases?.join(" ")||""} ${x.stockOrigin||""} ${x.filmType === "black-and-white" ? "흑백" : ""}`)).slice(0,6),
       cameras: cameras.filter(x => match(`${brandById[x.brandId].name} ${x.name} ISO ${x.iso} ${x.embeddedFilmName || ""}`)).slice(0,4),
       brands: brands.filter(x => match(x.name)).slice(0,4),
     };

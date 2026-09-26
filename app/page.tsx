@@ -12,6 +12,18 @@ import { buyableAvailability } from "@/lib/format";
 
 const featuredFilms = ["kodak-gold-200","kodak-portra-400","fujifilm-400","ilford-hp5-plus-400","cinestill-800t","harman-phoenix-ii-200","lomography-purple","lucky-c200"];
 const featuredCameras = ["kodak-funsaver","fujifilm-quicksnap-flash","ilford-hp5-single-use","manual-disposable"];
+const liveFilms=films.filter(x=>!x.comingSoon&&x.catalogStatus!=="in-development");
+const archiveStats=[
+  ["Still",liveFilms.filter(x=>(x.photographyUse||"still")==="still").length],
+  ["Motion",liveFilms.filter(x=>x.photographyUse==="motion-picture").length],
+  ["B&W",liveFilms.filter(x=>x.filmType==="black-and-white").length],
+  ["Color",liveFilms.filter(x=>["color-negative","special-color","redscale","cinema"].includes(x.filmType)).length],
+  ["Slide",liveFilms.filter(x=>x.filmType==="slide").length],
+  ["Effect",liveFilms.filter(x=>x.filmCategory==="effect"||x.filmCategory==="pre-exposed").length],
+  ["Industrial",liveFilms.filter(x=>x.photographyUse==="industrial"||x.filmCategory==="industrial").length],
+  ["Camera Exclusive",exclusiveEntries.filter(x=>x.kind!=="available").length],
+  ["Coming Soon",films.filter(x=>x.comingSoon||x.catalogStatus==="in-development").length],
+] as const;
 const openSearch = () => window.dispatchEvent(new Event("open-film-cabinet-search"));
 
 export default function Home() {
@@ -37,7 +49,7 @@ export default function Home() {
       <button className="entry-card" type="button" onClick={drawFilm}><span className="entry-icon"><Shuffle size={25}/></span><strong>오늘 뭐 넣지?</strong><small>랜덤으로 한 롤 추천</small><ArrowRight className="entry-arrow" size={18}/></button>
     </section>
     {randomFilm && <section className="container quick-random" aria-live="polite"><div><span className="section-kicker">TODAY&apos;S ROLL</span><h2>{brandById[randomFilm.brandId].name} {randomFilm.name}</h2><p>ISO {randomFilm.iso} · {randomFilm.process} · {randomFilm.recommendedFor.slice(0,2).join(" / ")}</p></div><div><button type="button" onClick={drawFilm}>다시 뽑기</button><Link href={`/film/${randomFilm.id}`}>상세보기 <ArrowRight size={16}/></Link></div></section>}
-    <div className="container compact-stats"><span><b>{films.length}</b> Films</span><span><b>{brands.length}</b> Brands</span><span><b>{cameras.length}</b> Cameras</span><span><b>{exclusiveEntries.filter(x=>x.kind!=="available").length}</b> Hidden Stocks</span></div>
+    <div className="container compact-stats"><span><b>{liveFilms.length}</b> Films</span><span><b>{brands.length}</b> Brands</span><span><b>{cameras.length}</b> Cameras</span>{archiveStats.map(([label,value])=><span key={label}><b>{value}</b> {label}</span>)}</div>
     <section className="container section-block"><div className="section-heading"><div><span className="section-kicker">OPEN A DRAWER</span><h2>많이 찾는 필름</h2><p>이름과 색감을 보고, 마음에 드는 한 롤을 꺼내보세요.</p></div><Link href="/films" className="text-link">모든 필름 보기 <ArrowRight size={17}/></Link></div><div className="card-grid">{featuredFilms.map(id=><FilmCard key={id} film={filmById[id]}/>)}</div></section>
     <section className="container home-discover"><div><span className="section-kicker">THERE IS MORE INSIDE</span><h2>카메라 안의 필름까지 들여다보세요.</h2><p>일반 롤로 살 수 없는 필름, 정확한 원판이 공개되지 않은 필름을 따로 모았습니다.</p></div><Link href="/exclusive-films">카메라 전용 필름 보기 <ArrowRight size={18}/></Link></section>
     <section className="container section-block"><div className="section-heading"><div><span className="section-kicker">PICK UP A CAMERA</span><h2>가볍게 들고 나가는 카메라</h2><p>내장 필름과 촬영 조건을 함께 확인하세요.</p></div><Link href="/cameras" className="text-link">모든 카메라 보기 <ArrowRight size={17}/></Link></div><div className="card-grid">{featuredCameras.map(id=><CameraCard key={id} camera={cameraById[id]}/>)}</div></section>

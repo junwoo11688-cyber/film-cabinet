@@ -8,7 +8,7 @@ import { films } from "@/data/films";
 import { cameras } from "@/data/cameras";
 import { brands, brandById } from "@/data/brands";
 import { countries } from "@/data/countries";
-import { filmTypeLabel, manufacturingLabel, isoBand, cameraTypeLabel, availabilityLabel, filmAvailabilityFilters, matchesFilmAvailability, catalogStatusLabel, filmAvailabilityLabel } from "@/lib/format";
+import { filmTypeLabel, manufacturingLabel, isoBand, cameraTypeLabel, availabilityLabel, filmAvailabilityFilters, matchesFilmAvailability, catalogStatusLabel, filmAvailabilityLabel, photographyUseLabel, filmCategoryLabel } from "@/lib/format";
 import { useStore } from "./store";
 
 type Group={key:string;label:string;options:string[]};
@@ -19,7 +19,9 @@ const filmGroups:Group[]=[
   {key:"manufacturerCountry",label:"Manufacturer Country",options:[...new Set(films.map(x=>x.manufacturerCountry||"미확인"))]},
   {key:"iso",label:"ISO 범위",options:["25 이하","50","80–100","125–200","250–400","500–800","1600 이상"]},
   {key:"type",label:"Film Type",options:Object.values(filmTypeLabel)},
-  {key:"process",label:"Process",options:["C-41","B&W","E-6","ECN-2"]},
+  {key:"process",label:"Process",options:["C-41","B&W","E-6","ECN-2","B&W Reversal","Other"]},
+  {key:"photographyUse",label:"Photography Use",options:Object.values(photographyUseLabel)},
+  {key:"category",label:"Film Category",options:[...Object.values(filmCategoryLabel),"IR / ORTHO"]},
   {key:"balance",label:"Color Balance",options:["Daylight","Tungsten","미확인"]},
   {key:"sale",label:"Availability · Catalog",options:[...filmAvailabilityFilters]},
   {key:"manufacturing",label:"Manufacturing Type",options:Object.values(manufacturingLabel)},
@@ -54,6 +56,8 @@ const quickFilters=[
   {label:"COLOR",key:"type",value:"컬러 네거티브"},{label:"B&W",key:"type",value:"흑백 네거티브"},
   ...quickIso.options.map(value=>({label:value,key:"quickIso",value})),
   {label:"C-41",key:"process",value:"C-41"},{label:"E-6",key:"process",value:"E-6"},{label:"ECN-2",key:"process",value:"ECN-2"},
+  {label:"STILL",key:"photographyUse",value:"Still Photography"},{label:"MOTION",key:"photographyUse",value:"Motion Picture"},{label:"INDUSTRIAL / SPECIAL",key:"photographyUse",value:"Industrial / Special"},
+  {label:"EFFECT",key:"category",value:"Effect"},{label:"PRE-EXPOSED",key:"category",value:"Pre-exposed"},{label:"RED SCALE",key:"category",value:"Red Scale"},{label:"CINEMA",key:"category",value:"Cinema"},{label:"INDUSTRIAL",key:"category",value:"Industrial"},{label:"IR / ORTHO",key:"category",value:"IR / ORTHO"},
   {label:"CURRENT",key:"sale",value:"공식 현행"},
 ];
 
@@ -64,7 +68,7 @@ export function Catalog({kind}:{kind:"films"|"cameras"}){
   const [initializedKind,setInitializedKind]=useState<"films"|"cameras"|null>(null);
   const {compare}=useStore();
   const groups=kind==="films"?filmGroups:cameraGroups;
-  const urlGroups=kind==="films"?[...filmGroups,quickIso]:cameraGroups;
+  const urlGroups=useMemo(()=>kind==="films"?[...filmGroups,quickIso]:cameraGroups,[kind]);
 
   useEffect(()=>{
     const restore=()=>{
@@ -87,7 +91,7 @@ export function Catalog({kind}:{kind:"films"|"cameras"}){
     if(search.trim())url.searchParams.set("q",search.trim());
     const next=url.pathname+url.search+url.hash;
     if(next!==window.location.pathname+window.location.search+window.location.hash)window.history.replaceState(window.history.state,"",next);
-  },[filters,search,initializedKind,kind]);
+  },[filters,search,initializedKind,kind,urlGroups]);
   useEffect(()=>{
     if(!drawer)return;
     const previous=document.body.style.overflow;document.body.style.overflow="hidden";
@@ -99,9 +103,10 @@ export function Catalog({kind}:{kind:"films"|"cameras"}){
   const toggle=(key:string,value:string)=>setFilters(prev=>{const current=prev[key]||[];return {...prev,[key]:current.includes(value)?current.filter(x=>x!==value):[...current,value]};});
   const list=useMemo(()=>kind==="films"?films.filter(item=>{
     const brand=brandById[item.brandId];const q=search.trim().toLowerCase();
-    const searchable=`${brand.name} ${item.name} ISO ${item.iso} ${item.process} ${item.recommendedFor.join(" ")} ${item.filmType} ${filmTypeLabel[item.filmType]} ${item.manufacturer||""} ${item.stockOrigin||""} ${catalogStatusLabel[item.catalogStatus]} ${filmAvailabilityLabel[item.availabilityStatus]} ${item.marketRegions?.join(" ")||""} ${item.filmType==="black-and-white"?"black and white 흑백":""} ${item.night>=4?"night 야경":""}`.toLowerCase();
+    const searchable=`${brand.name} ${item.name} ISO ${item.iso} ${item.process} ${item.releaseYear||""} ${item.recommendedFor.join(" ")} ${item.filmType} ${filmTypeLabel[item.filmType]} ${item.manufacturer||""} ${item.stockOrigin||""} ${item.sourceStockCode||""} ${item.searchAliases?.join(" ")||""} ${catalogStatusLabel[item.catalogStatus]} ${filmAvailabilityLabel[item.availabilityStatus]} ${item.marketRegions?.join(" ")||""} ${item.filmType==="black-and-white"?"black and white 흑백":""} ${item.night>=4?"night 야경":""}`.toLowerCase();
     const exactIso=!filters.quickIso?.length||filters.quickIso.some(value=>value==="ISO 800+"?item.iso>=800:item.iso===Number(value.replace("ISO ","")));
-    return (!q||searchable.includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",brand.country)&&match(filters,"manufacturerCountry",item.manufacturerCountry||"미확인")&&match(filters,"type",filmTypeLabel[item.filmType])&&match(filters,"iso",isoBand(item.iso))&&exactIso&&match(filters,"process",item.process)&&match(filters,"balance",item.balance==="daylight"?"Daylight":item.balance==="tungsten"?"Tungsten":"미확인")&&match(filters,"manufacturing",manufacturingLabel[item.manufacturingType])&&(!filters.sale?.length||filters.sale.some(value=>matchesFilmAvailability(item,value)))&&(!filters.market?.length||filters.market.some(value=>item.marketRegions?.includes(value as typeof item.marketRegions[number])))&&includesAny(filters,"for",item.recommendedFor)&&includesAny(filters,"collection",item.collectionTags||[]);
+    const categoryValues=[filmCategoryLabel[item.filmCategory||"standard"],...(item.filmCategory==="infrared"||item.filmCategory==="ortho"?["IR / ORTHO"]:[])];
+    return (!q||searchable.includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",brand.country)&&match(filters,"manufacturerCountry",item.manufacturerCountry||"미확인")&&match(filters,"type",filmTypeLabel[item.filmType])&&match(filters,"iso",isoBand(item.iso))&&exactIso&&match(filters,"process",item.process)&&match(filters,"photographyUse",photographyUseLabel[item.photographyUse||"still"])&&includesAny(filters,"category",categoryValues)&&match(filters,"balance",item.balance==="daylight"?"Daylight":item.balance==="tungsten"?"Tungsten":"미확인")&&match(filters,"manufacturing",manufacturingLabel[item.manufacturingType])&&(!filters.sale?.length||filters.sale.some(value=>matchesFilmAvailability(item,value)))&&(!filters.market?.length||filters.market.some(value=>item.marketRegions?.includes(value as typeof item.marketRegions[number])))&&includesAny(filters,"for",item.recommendedFor)&&includesAny(filters,"collection",item.collectionTags||[]);
   }):cameras.filter(item=>{
     const brand=brandById[item.brandId];const q=search.trim().toLowerCase();
     return (!q||`${brand.name} ${item.name} ISO ${item.iso} ${item.embeddedFilmName}`.toLowerCase().includes(q))&&match(filters,"brand",brand.name)&&match(filters,"country",item.country)&&match(filters,"type",cameraTypeLabel[item.cameraType])&&match(filters,"iso",isoBand(item.iso))&&match(filters,"color",item.filmType==="black-and-white"?"흑백":"컬러")&&match(filters,"flash",item.flash?"있음":"없음")&&match(filters,"waterproof",item.waterproof?"있음":"없음")&&match(filters,"process",item.process)&&match(filters,"exposures",item.exposures===0?"필름에 따라 다름":item.exposures===27?"27컷":item.exposures===36?"36컷":"기타")&&match(filters,"reloadable",item.reloadable?"가능":"불가")&&match(filters,"availability",availabilityLabel[item.standaloneFilmAvailability]);

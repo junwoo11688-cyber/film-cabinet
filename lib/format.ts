@@ -1,4 +1,4 @@
-import { Camera, Confidence, Film, FilmType, ManufacturingType, CatalogStatus, FilmAvailability } from "@/data/types";
+import { Camera, Confidence, Film, FilmType, ManufacturingType, CatalogStatus, FilmAvailability, PhotographyUse, PackagingType, FilmCategory, Treatment } from "@/data/types";
 
 export const filmTypeLabel: Record<FilmType, string> = {
   "color-negative":"컬러 네거티브", "black-and-white":"흑백 네거티브", slide:"슬라이드",
@@ -15,13 +15,17 @@ export const confidenceLabel: Record<Confidence, string> = {
   verified:"✓ VERIFIED", likely:"△ LIKELY", unknown:"? UNKNOWN",
 };
 export const catalogStatusLabel: Record<CatalogStatus,string> = {
-  "official-current":"OFFICIAL CURRENT","official-legacy":"LEGACY","retail-current":"RETAIL CURRENT","regional-current":"REGIONAL CURRENT",unknown:"CATALOG UNKNOWN",
+  "official-current":"OFFICIAL CURRENT","official-legacy":"LEGACY","retail-current":"RETAIL CURRENT","regional-current":"REGIONAL CURRENT",limited:"LIMITED","in-development":"IN DEVELOPMENT",unknown:"CATALOG UNKNOWN",
 };
+export const photographyUseLabel:Record<PhotographyUse,string>={still:"Still Photography","motion-picture":"Motion Picture",industrial:"Industrial / Special","multi-purpose":"Multi-purpose"};
+export const packagingTypeLabel:Record<PackagingType,string>={"135-cartridge":"135 Cartridge","35mm-motion-bulk":"35mm Motion Bulk","35mm-bulk":"35mm Bulk",other:"Other"};
+export const filmCategoryLabel:Record<FilmCategory,string>={standard:"Standard",cinema:"Cinema",effect:"Effect","pre-exposed":"Pre-exposed",redscale:"Red Scale",infrared:"Infrared",ortho:"Ortho",industrial:"Industrial","special-purpose":"Special Purpose"};
+export const treatmentLabel:Record<Treatment,string>={none:"None","remjet-removed":"Rem-jet removed",ahu:"AHU","pre-exposed":"Pre-exposed","color-tinted":"Color-tinted",redscale:"Redscale","special-effect":"Special effect"};
 export const filmAvailabilityLabel: Record<FilmAvailability,string> = {
   "in-stock":"IN STOCK","out-of-stock":"OUT OF STOCK",preorder:"PREORDER","retail-available":"RETAIL AVAILABLE",regional:"REGIONAL","availability-unknown":"AVAILABILITY UNKNOWN",discontinued:"DISCONTINUED",
 };
 export const buyableAvailability: FilmAvailability[] = ["in-stock","retail-available","regional","preorder"];
-export const filmAvailabilityFilters = ["전체","현재 구매 가능","공식 현행","소매 유통","예약 판매","지역 한정","품절","판매상태 확인 필요","레거시","단종"] as const;
+export const filmAvailabilityFilters = ["전체","현재 구매 가능","공식 현행","소매 유통","예약 판매","지역 한정","품절","판매상태 확인 필요","한정판","개발 중","레거시","단종"] as const;
 export function matchesFilmAvailability(film:Film,filter:string){
   switch(filter){
     case "전체":return true;
@@ -32,6 +36,8 @@ export function matchesFilmAvailability(film:Film,filter:string){
     case "지역 한정":return film.catalogStatus==="regional-current"||film.availabilityStatus==="regional";
     case "품절":return film.availabilityStatus==="out-of-stock";
     case "판매상태 확인 필요":return film.availabilityStatus==="availability-unknown";
+    case "한정판":return film.catalogStatus==="limited"||!!film.limitedEdition;
+    case "개발 중":return film.catalogStatus==="in-development"||!!film.comingSoon;
     case "레거시":return film.catalogStatus==="official-legacy";
     case "단종":return film.status==="discontinued"||film.availabilityStatus==="discontinued";
     default:return true;

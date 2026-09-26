@@ -29,6 +29,7 @@ data/brands.ts       브랜드와 브랜드 국가
 data/countries.ts    국가 표시
 data/films.ts        필름 레코드
 data/catalog-expansion.ts  2026-09-25 전수 감사에서 누락된 제품과 새로 발견한 제품
+data/archive-expansion.ts  2026-09-26 공식 출처로 검증한 스틸·모션·효과·산업용 확장 카탈로그
 data/master-catalog.ts      독립 마스터 목록(125종)과 기존 안정 ID 매핑
 data/cameras.ts      카메라 레코드
 data/exclusive.ts    카메라 내장 필름 분류
@@ -52,7 +53,7 @@ pnpm dev
 
 ## Film Data Architecture
 
-기존 `data/films.ts`의 28개 Film 객체는 유지했습니다. 전수 감사에서 마스터 125종 중 26종이 이미 존재했고, 빠진 99종만 `data/catalog-expansion.ts`에 추가했습니다. 별도로 공식 카탈로그와 판매처에서 발견한 제품은 `newlyDiscovered: true`로 표시합니다. `films.ts`의 `film()` 함수가 기본 점수와 브랜드 국가를 채우고 두 데이터 소스를 합칩니다. 새 제품의 특성 점수와 발색은 충분히 확인되지 않아 상세 화면과 비교표에서 **미평가**로 표시합니다.
+기존 `data/films.ts`와 `data/catalog-expansion.ts`의 레코드는 유지합니다. 2026-09-26 확장분은 `data/archive-expansion.ts`에 분리했으며, 공식 제조사·브랜드·공식 유통·전문 판매처 순으로 검증된 제품만 병합합니다. `films.ts`의 `film()` 함수가 기존 필름에는 `still` / `135-cartridge` 호환 기본값을 채우고 모든 데이터 소스를 합칩니다. 새 제품의 특성 점수와 발색은 충분히 확인되지 않아 상세 화면과 비교표에서 **미평가**로 표시합니다.
 
 `data/master-catalog.ts`는 실제 Film 객체와 별도로 유지하는 비교 기준입니다. 이름만 다른 기존 제품은 원래 `id`를 연결하므로 즐겨찾기·URL이 깨지지 않습니다. 컷 수와 묶음 판매는 별도 Film이 아니라 `availableExposures`와 `packageVariants`로 관리합니다.
 
@@ -62,7 +63,7 @@ pnpm dev
 pnpm audit:films
 ```
 
-`/data-audit`에서도 등록 수, 마스터 누락, 중복, 원판·판매상태 미확인, 지역 제품과 품절 제품을 볼 수 있습니다. 이 경로는 탐색 메뉴와 검색엔진에 노출하지 않습니다. CLI는 중복 ID·slug·동일 브랜드 제품명, 없는 브랜드, 누락된 마스터 항목, 지역 정보 누락, 공식 현행의 출처 누락, 단종/재고 충돌, 제조사 미공개와 Verified 충돌, 끊어진 카메라 연결을 검사합니다. 추가 후 `pnpm audit:films`, `pnpm typecheck`, `pnpm build`를 실행합니다.
+`/data-audit`에서도 TOTAL, STILL, MOTION, EFFECT, INDUSTRIAL, LIMITED, COMING SOON, UNKNOWN STOCK, MISSING SOURCES를 볼 수 있습니다. CLI는 중복 ID·slug·동일 브랜드 제품명, 없는 브랜드, 출처 누락, motion-picture/135 모순, coming-soon/재고 모순, 끊어진 `derivedFromFilmId`와 카메라 연결, 하프프레임 노출 수 경고를 검사합니다. 추가 후 `pnpm audit:films`, `pnpm typecheck`, `pnpm build`를 실행합니다.
 
 ## 데이터 추가
 
@@ -72,7 +73,7 @@ pnpm audit:films
 
 ### 필름
 
-`data/catalog-expansion.ts`에 새 `CatalogFilmSeed`를 추가하고, 마스터 대상이라면 `data/master-catalog.ts`에도 ID를 추가합니다. `brandId`는 등록된 브랜드 `id`와 같아야 하며, `id`와 기본 `slug`가 `/film/[slug]` 주소가 됩니다. ISO, 필름 종류, 현상 방식, `catalogStatus`, `availabilityStatus`, 색상 프로필, 촬영 추천, 출처를 입력합니다. 원판·실제 제조사가 공개되지 않았으면 값을 추정해 넣지 않고 비워 두며 `dataConfidence: "unknown"`을 사용합니다. 필요하면 점수를 근거에 맞춰 조정합니다.
+`data/catalog-expansion.ts` 또는 출처 검증형 `data/archive-expansion.ts`에 `CatalogFilmSeed`를 추가합니다. `brandId`는 등록된 브랜드 `id`와 같아야 하며, `id`와 기본 `slug`가 `/film/[slug]` 주소가 됩니다. ISO, 필름 종류, 현상 방식, `catalogStatus`, `availabilityStatus`, 색상 프로필, 촬영 추천, 출처를 입력합니다. 원판·실제 제조사가 공개되지 않았으면 추측하지 않고 `dataConfidence: "unknown"`을 사용합니다.
 
 ### 카메라
 
@@ -99,7 +100,7 @@ pnpm audit:films
 - `likely`: 일부 정보가 제한되지만 비교적 근거가 있는 정보
 - `unknown`: 원판·제조사·제품 정보가 공개되지 않은 경우
 
-공식 문서가 있으면 `sources: [{ name, url, sourceTier }]`에 연결합니다. `sourceTier`는 `manufacturer`, `official-distributor`, `authorized-retailer`, `specialist-retailer`, `secondary` 중 하나입니다. 브랜드 공식 자료가 제품의 존재를 확인하더라도 원판 제조사를 공개하지 않았다면 `dataConfidence`를 Verified로 올리지 않습니다. 신뢰도는 레코드 전반에 대한 보수적인 표시이며, 모든 세부 필드의 개별 검증을 뜻하지 않습니다.
+공식 문서가 있으면 `sources: [{ name, url, sourceTier }]`에 연결합니다. `sourceTier`는 `manufacturer`, `official-brand`, `official-distributor`, `authorized-retailer`, `specialist-retailer`, `secondary` 중 하나입니다. 브랜드 공식 자료가 제품의 존재를 확인하더라도 원판 제조사를 공개하지 않았다면 제조 관계의 신뢰도를 Verified로 올리지 않습니다.
 
 ## Availability Model
 
@@ -116,6 +117,34 @@ pnpm audit:films
 ## Exclusive Film System / Film-Camera Linking
 
 일회용 카메라의 내장 필름이 일반 롤과 정확히 같은 경우에만 `exactFilmMatch: true`로 연결합니다. 이름이나 ISO만 같은 경우에는 `false`를 사용하고 카메라에 `embeddedFilmName`과 이유를 남깁니다. `data/exclusive.ts`의 A/B/C 분류는 별도 판매 여부와 원판 공개 여부를 설명합니다. 카메라에서만 만날 수 있다는 표시는 같은 135 롤의 별도 판매가 확인되지 않을 때만 사용합니다.
+
+## Still vs Motion Film
+
+`photographyUse`는 `still`, `motion-picture`, `industrial`, `multi-purpose`를 구분합니다. `packagingType`은 일반 사진용 `135-cartridge`, 촬영용 원본 롤 `35mm-motion-bulk`, 기술·복제용 `35mm-bulk`, 기타 규격을 분리합니다. Kodak VISION3 같은 원본 모션 재고를 135/36으로 표시하지 않습니다. 리스풀된 35mm 카트리지는 원본과 별도의 Film 객체입니다.
+
+## Film Stock Relationships
+
+공식 자료가 원판을 명시할 때만 파생 제품에 `derivedFromFilmId`를 기록합니다. 예를 들어 Kodak VISION3 500T 5219와 ILFOCOLOR CINE TONE 400은 별도 제품이며, 후자가 전자를 가리킵니다. 원본 상세 화면은 이 역방향 관계를 자동 계산해 Derived / Related Products로 보여줍니다. `sourceStockCode`와 `searchAliases`를 함께 기록하면 `5219`, `500T`, `Vision 500T`로 검색할 수 있습니다.
+
+## Effect Film Model / Pre-exposed Film
+
+`filmCategory`는 `effect`, `pre-exposed`, `redscale` 등을 일반 색감과 분리합니다. `treatment`는 `pre-exposed`, `color-tinted`, `redscale`, `ahu`, `remjet-removed`, `special-effect`처럼 처리 방식을 표현합니다. 공개되지 않은 효과 제조법은 추측하지 않습니다. 패턴이 공식 공개된 경우에만 `preExposedPattern`, `effectDescription`, `effectColor`를 사용합니다.
+
+## Industrial Film
+
+복제·프린트·보존·항공·초저감도 재고는 `filmCategory: "industrial"` 또는 `industrialStock: true`로 표시합니다. 이는 일반 스틸 필름과 품질 서열을 의미하지 않으며, 원래 용도와 사진 촬영 시의 특수성을 설명하기 위한 분류입니다.
+
+## Brand vs Manufacturer
+
+`Brand`는 판매·운영 주체이고 `manufacturer`는 실제 감광재 제조 주체입니다. 두 값은 같을 수도, 다를 수도 있습니다. `originCountry`와 `currentOperatorCountry`도 분리하며, YASHICA와 SantaColor처럼 브랜드 기원과 현재 운영지가 다른 경우 모두 표시합니다. 브랜드 관계는 `associatedBrandIds`와 `relatedBrandIds`로 기록합니다.
+
+## Coming Soon / In Development
+
+정식 판매 전 공식 개발 항목은 `catalogStatus: "in-development"`, `comingSoon: true`로 기록합니다. 이 항목은 Current Films와 판매 가능 수에서 제외합니다. 개발 사실을 공식 출처로 확인할 수 없다면 watchlist 제품을 만들지 않습니다.
+
+## Half-frame Single-use Cameras
+
+카메라의 `frameFormat`은 `full-frame` 또는 `half-frame`입니다. 하프프레임 제품은 카드·상세·비교에서 별도 배지를 표시하며, 54컷처럼 두 배에 가까운 노출 수를 갖는지 감사 스크립트가 경고 수준으로 점검합니다.
 
 ## 이미지 추가
 

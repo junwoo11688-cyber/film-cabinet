@@ -1,6 +1,7 @@
 import { brandById } from "./brands";
 import { Film } from "./types";
 import { catalogExpansions } from "./catalog-expansion";
+import { archiveExpansions } from "./archive-expansion";
 
 type FilmSeed = Omit<Film, "slug" | "brandCountry" | "format" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus"> & Partial<Pick<Film, "slug" | "grain" | "contrast" | "saturation" | "latitude" | "portrait" | "landscape" | "night" | "beginner" | "uniqueness" | "status" | "dataConfidence" | "catalogStatus" | "availabilityStatus">>;
 const officialSource = (brandId: string) => ({name:"브랜드 공식 카탈로그",url:({kodak:"https://www.kodak.com/en/still-film/home/",fujifilm:"https://www.fujifilm.com/jp/ja/consumer/films/negative-and-reversal/jan",ilford:"https://www.ilfordphoto.com/film/",harman:"https://www.harmanphoto.co.uk/harman-colour-film",cinestill:"https://cinestillfilm.com/collections/product-catalog/35mm",lomography:"https://shop.lomography.com/world/film/all",agfaphoto:"https://www.agfaphoto-gtc.com/en/95-photo-film",reto:"https://retoproject.com/collections/shop",filmneverdie:"https://filmneverdie.com/products/filmneverdie-bento-box",flicfilm:"https://flicfilm.ca/",lucky:"https://www.lucky.cn/index/home",manual:"https://shop.manualphoto.com/collections/film"} as Record<string,string>)[brandId],sourceTier:"manufacturer" as const});
@@ -38,6 +39,7 @@ const catalogOverrides: Record<string, Partial<Film>> = {
   "lomography-lomochrome-classicolor-200":{usedInCameras:["lomo-simple-classicolor"]},
   "lomography-lomochrome-metropolis":{usedInCameras:["lomo-simple-metropolis"]},
   "rollei-retro-80s":{catalogStatus:"retail-current",sources:[{name:"Rollei 공식 유통 자료",url:"https://www.macodirect.de/media/pdf/cc/65/94/Retro400_Datenblatt_e.pdf",sourceTier:"official-distributor"}]},
+  "rollei-rpx-400":{usedInCameras:["rollei-inferno-ragazzi"]},
   "agfaphoto-apx-400":{catalogStatus:"official-current",availabilityStatus:"in-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("agfaphoto")]},
   "reto-prism-400":{catalogStatus:"official-current",availabilityStatus:"in-stock",availabilityCheckedAt:"2026-09-25",sources:[officialSource("reto")]},
   "filmneverdie-umi-800":{catalogStatus:"official-current",sources:[officialSource("filmneverdie")]},
@@ -66,7 +68,7 @@ const discoveryCollections: Record<string,string[]> = {
   "flicfilm-street-candy-tasty-200":["2025–2026 신제품"],
   "flicfilm-fusion-200":["2025–2026 신제품"],
 };
-const expansionIds = new Set(catalogExpansions.map(item=>item.id));
+const expansionIds = new Set([...catalogExpansions,...archiveExpansions].map(item=>item.id));
 const typeDescription:Record<Film["filmType"],string>={"color-negative":"컬러 네거티브","black-and-white":"흑백 네거티브",slide:"슬라이드",redscale:"레드스케일","special-color":"특수 컬러",cinema:"영화용 원판 기반"};
 function factualDescription(item:FilmSeed){
   const light=item.balance==="daylight"?" 일광용.":item.balance==="tungsten"?" 텅스텐 조명용.":"";
@@ -76,6 +78,9 @@ function factualDescription(item:FilmSeed){
 }
 const film = (item: FilmSeed): Film => ({
   slug: item.id, format: "35mm", brandCountry: brandById[item.brandId].country,
+  photographyUse:"still", packagingType:"135-cartridge",
+  filmCategory:item.filmType==="cinema"?"cinema":item.filmType==="redscale"?"redscale":item.filmType==="special-color"?"effect":"standard",
+  primaryProcess:item.process, treatment:"none",
   grain: 3, contrast: 3, saturation: 3, latitude: 3, portrait: 3, landscape: 3, night: 2, beginner: 4, uniqueness: 2,
   status: "current", dataConfidence: "likely", catalogStatus:"unknown", availabilityStatus:"availability-unknown", marketRegions:["lomography","manual"].includes(item.brandId)?["Worldwide"]:undefined, ...item, ...catalogOverrides[item.id], description:expansionIds.has(item.id)&&item.description.endsWith("제조 및 판매 정보는 연결된 출처와 확인 날짜를 기준으로 표시합니다.")?factualDescription({...item,...catalogOverrides[item.id]}):item.description, collectionTags:discoveryCollections[item.id]||item.collectionTags, profileEstimated:expansionIds.has(item.id),
 });
@@ -110,6 +115,7 @@ export const films: Film[] = [
   film({ id:"lucky-c200", brandId:"lucky", name:"C200", iso:200, filmType:"color-negative", process:"C-41", balance:"daylight", manufacturer:"Lucky Film", manufacturerCountry:"중국", manufacturingType:"manufacturer", contrast:3, saturation:3, colorProfile:["#d8ae74","#ba6d5c","#6992a5"], description:"중국 Lucky Film의 데이라이트 컬러 네거티브.", recommendedFor:["여행","일상","맑은 날"], dataConfidence:"likely" }),
   film({ id:"manual-mc400", brandId:"manual", name:"MC400", iso:400, filmType:"cinema", process:"C-41", balance:"daylight", manufacturingType:"cinema-conversion", stockOrigin:"영화용 컬러 네거티브 · 정확한 원판 미공개", contrast:4, saturation:3, night:3, uniqueness:4, colorProfile:["#d5a67b","#af7165","#688998"], description:"도시의 빛과 그림자를 담는 시네마 감성 컬러 필름. 정확한 원판은 공개 정보가 제한적입니다.", recommendedFor:["스트리트","영화 같은 느낌","일상"], dataConfidence:"unknown", sources:[{name:"Manual MC400 제품 정보",url:"https://shop.manualphoto.com/products/manual-mc400-35mm-film-single"}] }),
   ...catalogExpansions.map(film),
+  ...archiveExpansions.map(film),
 ];
 
 export const filmById = Object.fromEntries(films.map((item) => [item.id, item])) as Record<string, Film>;

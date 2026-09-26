@@ -1,15 +1,20 @@
 export type Confidence = "verified" | "likely" | "unknown";
-export type Process = "C-41" | "B&W" | "E-6" | "ECN-2";
+export type Process = "C-41" | "B&W" | "E-6" | "ECN-2" | "B&W Reversal" | "Other";
 export type FilmType = "color-negative" | "black-and-white" | "slide" | "redscale" | "special-color" | "cinema";
 export type ManufacturingType = "manufacturer" | "oem" | "respooled" | "cinema-conversion" | "unknown";
 export type FilmAvailability = "in-stock" | "out-of-stock" | "preorder" | "retail-available" | "regional" | "availability-unknown" | "discontinued";
-export type CatalogStatus = "official-current" | "official-legacy" | "retail-current" | "regional-current" | "unknown";
+export type CatalogStatus = "official-current" | "official-legacy" | "retail-current" | "regional-current" | "limited" | "in-development" | "unknown";
 export type MarketRegion = "Worldwide" | "USA" | "Japan" | "Korea" | "Europe" | "Hong Kong" | "Australia" | "Canada" | "China";
-export type SourceTier = "manufacturer" | "official-distributor" | "authorized-retailer" | "specialist-retailer" | "secondary";
+export type SourceTier = "manufacturer" | "official-brand" | "official-distributor" | "authorized-retailer" | "specialist-retailer" | "secondary";
 export type Source = { name: string; url: string; sourceTier?: SourceTier };
+export type PhotographyUse = "still" | "motion-picture" | "industrial" | "multi-purpose";
+export type PackagingType = "135-cartridge" | "35mm-motion-bulk" | "35mm-bulk" | "other";
+export type FilmCategory = "standard" | "cinema" | "effect" | "pre-exposed" | "redscale" | "infrared" | "ortho" | "industrial" | "special-purpose";
+export type Treatment = "none" | "remjet-removed" | "ahu" | "pre-exposed" | "color-tinted" | "redscale" | "special-effect";
 
 export type Brand = {
   id: string;
+  slug?: string;
   name: string;
   country: string;
   group: string;
@@ -19,6 +24,11 @@ export type Brand = {
   color: string;
   manufacturer?: string;
   parentCompany?: string;
+  originCountry?: string;
+  currentOperatorCountry?: string;
+  associatedBrandIds?: string[];
+  relatedBrandIds?: string[];
+  watchlist?: boolean;
 };
 
 export type Film = {
@@ -35,6 +45,26 @@ export type Film = {
   format: "35mm";
   filmType: FilmType;
   process: Process;
+  primaryProcess?: Process;
+  compatibleProcesses?: string[];
+  photographyUse?: PhotographyUse;
+  packagingType?: PackagingType;
+  filmCategory?: FilmCategory;
+  treatment?: Treatment;
+  limitedEdition?: boolean;
+  releaseYear?: number;
+  sourceStockCode?: string;
+  filmLength?: string;
+  currentOperatorCountry?: string;
+  originCountry?: string;
+  comingSoon?: boolean;
+  derivedFromFilmId?: string;
+  relatedFilmIds?: string[];
+  effectDescription?: string;
+  effectColor?: string[];
+  preExposedPattern?: string;
+  searchAliases?: string[];
+  industrialStock?: boolean;
   balance?: "daylight" | "tungsten";
   dxCode?: boolean;
   availableExposures?: number[];
@@ -67,11 +97,13 @@ export type Film = {
 
 export type Camera = {
   id: string;
+  slug?: string;
   brandId: string;
   name: string;
   country: string;
   cameraType: "single-use" | "preloaded-reusable" | "reusable";
   filmFormat: "35mm";
+  frameFormat?: "full-frame" | "half-frame";
   embeddedFilmName?: string;
   linkedFilmId?: string;
   exactFilmMatch?: boolean;

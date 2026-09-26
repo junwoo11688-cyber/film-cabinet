@@ -1,3 +1,5 @@
+import { archiveExpansions } from "./archive-expansion";
+
 export type CanonicalFilm = { id: string; brandId: string; name: string };
 // The user-supplied master target, mapped to existing stable IDs where a product was already present.
 // This independent manifest is compared with the live Film objects by npm run audit:films.
@@ -127,4 +129,5 @@ export const canonicalFilms: CanonicalFilm[] = [
   {"id":"manual-mc400","brandId":"manual","name":"MC400"},
   {"id":"manual-mc800","brandId":"manual","name":"MC800"},
   {"id":"manual-mc400-b-w","brandId":"manual","name":"MC400 B/W"},
+  ...archiveExpansions.map(({id,brandId,name})=>({id,brandId,name})),
 ];

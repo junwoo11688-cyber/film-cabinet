@@ -5,7 +5,7 @@ import { useState } from "react";
 import { films, filmById } from "@/data/films";
 import { cameras, cameraById } from "@/data/cameras";
 import { brandById } from "@/data/brands";
-import { filmTypeLabel, manufacturingLabel, stockLabel, availabilityLabel, cameraExposures, catalogStatusLabel, filmAvailabilityLabel } from "@/lib/format";
+import { filmTypeLabel, manufacturingLabel, stockLabel, availabilityLabel, cameraExposures, catalogStatusLabel, filmAvailabilityLabel, photographyUseLabel, packagingTypeLabel, filmCategoryLabel, treatmentLabel } from "@/lib/format";
 import { useStore } from "./store";
 
 type Kind="films"|"cameras";
@@ -13,16 +13,16 @@ type Row=[string,(id:string)=>React.ReactNode];
 type Section={title:string;rows:Row[]};
 const score=(id:string,key:"grain"|"contrast"|"saturation"|"latitude"|"portrait"|"landscape"|"night"|"beginner"|"uniqueness")=>filmById[id].profileEstimated?"미평가":`${filmById[id][key]}/5`;
 const filmSections:Section[]=[
-  {title:"BASIC",rows:[["ISO",id=>filmById[id].iso],["Film Type",id=>filmTypeLabel[filmById[id].filmType]],["Process",id=>filmById[id].process],["Balance",id=>filmById[id].balance||"미확인"]]},
+  {title:"BASIC",rows:[["ISO",id=>filmById[id].iso],["Film Type",id=>filmTypeLabel[filmById[id].filmType]],["Use",id=>photographyUseLabel[filmById[id].photographyUse||"still"]],["Packaging",id=>packagingTypeLabel[filmById[id].packagingType||"135-cartridge"]],["Category",id=>filmCategoryLabel[filmById[id].filmCategory||"standard"]],["Process",id=>filmById[id].process],["Balance",id=>filmById[id].balance||"미확인"]]},
   {title:"LOOK",rows:[["Grain",id=>score(id,"grain")],["Contrast",id=>score(id,"contrast")],["Saturation",id=>score(id,"saturation")],["Latitude",id=>score(id,"latitude")],["Uniqueness",id=>score(id,"uniqueness")]]},
   {title:"USE",rows:[["Portrait",id=>score(id,"portrait")],["Landscape",id=>score(id,"landscape")],["Night",id=>score(id,"night")],["Beginner",id=>score(id,"beginner")]]},
-  {title:"ORIGIN",rows:[["Brand",id=>brandById[filmById[id].brandId].name],["Brand Country",id=>filmById[id].brandCountry],["Manufacturer",id=>filmById[id].manufacturer||"공개되지 않음"],["Manufacturer Country",id=>filmById[id].manufacturerCountry||"미확인"],["Original Stock",id=>filmById[id].stockOrigin||"공개되지 않음"],["Manufacturing",id=>manufacturingLabel[filmById[id].manufacturingType]],["Confidence",id=>filmById[id].dataConfidence.toUpperCase()]]},
+  {title:"ORIGIN",rows:[["Brand",id=>brandById[filmById[id].brandId].name],["Brand Country",id=>filmById[id].brandCountry],["Manufacturer",id=>filmById[id].manufacturer||"공개되지 않음"],["Manufacturer Country",id=>filmById[id].manufacturerCountry||"미확인"],["Original Stock",id=>filmById[id].stockOrigin||"공개되지 않음"],["Stock Code",id=>filmById[id].sourceStockCode||"미확인"],["Treatment",id=>treatmentLabel[filmById[id].treatment||"none"]],["Derived From",id=>filmById[id].derivedFromFilmId?filmById[filmById[id].derivedFromFilmId!]?.name||"연결 오류":"해당 없음"],["Manufacturing",id=>manufacturingLabel[filmById[id].manufacturingType]],["Confidence",id=>filmById[id].dataConfidence.toUpperCase()]]},
   {title:"STATUS",rows:[["Catalog",id=>catalogStatusLabel[filmById[id].catalogStatus]],["Availability",id=>filmAvailabilityLabel[filmById[id].availabilityStatus]],["Region",id=>filmById[id].marketRegions?.join(" · ")||"미확인"],["Last Verified",id=>filmById[id].availabilityCheckedAt||"미확인"]]},
 ];
 const cameraSections:Section[]=[
   {title:"BASIC",rows:[["ISO",id=>cameraById[id].iso||"미확인"],["Exposures",id=>cameraExposures(cameraById[id].exposures)],["Camera Type",id=>cameraById[id].cameraType],["Film Type",id=>filmTypeLabel[cameraById[id].filmType]],["Process",id=>cameraById[id].process]]},
   {title:"FILM INSIDE",rows:[["Embedded Film",id=>cameraById[id].embeddedFilmName||"별도 장전"],["Standalone Roll",id=>availabilityLabel[cameraById[id].standaloneFilmAvailability]],["Stock Status",id=>stockLabel[cameraById[id].stockStatus]],["Exact Match",id=>cameraById[id].exactFilmMatch?"확인됨":"미확인"]]},
-  {title:"CAMERA",rows:[["Flash",id=>cameraById[id].flash?"있음":"없음"],["Waterproof",id=>cameraById[id].waterproof?cameraById[id].waterproofDepth?`${cameraById[id].waterproofDepth}m`:"있음":"없음"],["Lens",id=>cameraById[id].lens||"공개 정보 없음"],["Reloadable",id=>cameraById[id].reloadable?"가능":"불가"]]},
+  {title:"CAMERA",rows:[["Frame Format",id=>cameraById[id].frameFormat==="half-frame"?"Half Frame":"Full Frame"],["Flash",id=>cameraById[id].flash?"있음":"없음"],["Waterproof",id=>cameraById[id].waterproof?cameraById[id].waterproofDepth?`${cameraById[id].waterproofDepth}m`:"있음":"없음"],["Lens",id=>cameraById[id].lens||"공개 정보 없음"],["Reloadable",id=>cameraById[id].reloadable?"가능":"불가"]]},
 ];
 export function CompareView(){
   const [kind,setKind]=useState<Kind>("films");
